@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" id="viewportMeta" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>CVJet-Global.co | Global Job Matcher & Advanced ATS Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -72,20 +72,25 @@
                 </div>
             </div>
 
-            <!-- Desktop Quick Links -->
-            <nav class="hidden xl:flex items-center gap-6 text-sm font-bold text-slate-600">
+            <!-- Desktop Quick Links & View Switcher -->
+            <div class="hidden xl:flex items-center gap-6 text-sm font-bold text-slate-600">
                 <a href="#jobsSection" class="hover:text-blue-600 transition">الوظائف المتاحة</a>
                 <a href="javascript:void(0)" onclick="quickFilterMode('remote')" class="hover:text-blue-600 transition">عمل عن بُعد</a>
                 <a href="javascript:void(0)" onclick="openAtsScannerModal()" class="hover:text-blue-600 transition">فحص ATS المجاني</a>
                 <a href="#companiesSection" class="hover:text-blue-600 transition">دليل الشركات</a>
-            </nav>
+            </div>
 
-            <!-- Action Buttons -->
+            <!-- Action Buttons + Desktop/Mobile Toggle Icon -->
             <div class="flex items-center gap-2 shrink-0">
+                <!-- Desktop <-> Mobile View Switcher Icon -->
+                <button onclick="toggleDesktopMobileView()" id="viewToggleBtn" class="bg-purple-100 hover:bg-purple-200 text-purple-700 w-9 h-9 rounded-xl flex items-center justify-center font-bold transition text-xs shadow-sm" title="التحويل بين وضع الموبايل ووضع سطح المكتب">
+                    <i class="fa-solid fa-desktop" id="viewToggleIcon"></i>
+                </button>
+
                 <button onclick="toggleLanguage()" id="langBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-3 py-2 rounded-xl font-bold transition text-xs border border-slate-200">
                     🌐 EN
                 </button>
-                <button onclick="openRedeemModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 sm:px-4 py-2 rounded-xl font-bold transition shadow text-xs flex items-center gap-1.5">
+                <button onclick="openRedeemModal()" class="hidden sm:flex bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl font-bold transition shadow text-xs items-center gap-1.5">
                     <i class="fa-solid fa-key"></i> <span>تفعيل كود</span>
                 </button>
                 <button onclick="openPaymentModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 sm:px-4 py-2 rounded-xl font-black transition shadow text-xs flex items-center gap-1.5">
@@ -443,7 +448,7 @@
         </div>
     </div>
 
-    <!-- Admin Password Modal (Fixed Clean Input & Correct Password prompt) -->
+    <!-- Admin Password Modal (Fixed Clean Input & Password is adminadmin123) -->
     <div id="adminPasswordModal" class="modal-overlay hidden">
         <div class="modal-box max-w-sm p-6 text-center space-y-4 relative">
             <button onclick="closeAdminPasswordModal()" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
@@ -452,7 +457,7 @@
             </div>
             <h3 class="text-lg font-black text-slate-900">دخول لوحة التحكم (Admin Panel)</h3>
             <p class="text-xs text-slate-500">أدخل كلمة المرور الخاصة بلوحة التحكم:</p>
-            <input type="password" id="adminSecretInput" placeholder="أدخل كلمة المرور هنا..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-center font-mono focus:outline-none focus:border-purple-600">
+            <input type="password" id="adminSecretInput" placeholder="اكتب كلمة المرور هنا..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-center font-mono focus:outline-none focus:border-purple-600">
             <div class="flex gap-2">
                 <button onclick="closeAdminPasswordModal()" class="w-1/2 bg-slate-200 text-slate-800 py-2.5 rounded-xl font-bold text-xs">إلغاء</button>
                 <button onclick="verifyAdminPassword()" class="w-1/2 bg-purple-700 hover:bg-purple-600 text-white py-2.5 rounded-xl font-bold text-xs shadow">دخول ⚙️</button>
@@ -576,6 +581,7 @@
         var currentUserAccount = localStorage.getItem('cvjet_user_acc') || '';
         var uploadedLogoBase64 = '';
         var threeMonthMs = 90 * 24 * 60 * 60 * 1000;
+        var isDesktopView = false;
 
         var defaultSiteConfig = {
             topBanner: 'هل تبحث عن فرص عمل دولية بدعم الفيزا أو فحص سيرتك الذاتية؟ نرحب بك في منصتنا العالمية.',
@@ -583,7 +589,7 @@
             heroDesc: 'نقرأ سيرتك الذاتية ونستخرج خبراتك ومهاراتك وتخصصك، ثم نطابقها مع الوظائف المنشورة في 195 دولة مع دعم تأشيرة العمل ونعرض لك نسبة التوافق فوراً.',
             freeJobsLimit: 5,
             priceText: 'اشتراك 8$ / 3 شهور',
-            adminPassword: 'admin123'
+            adminPassword: 'adminadmin123'
         };
 
         var siteConfig = JSON.parse(localStorage.getItem('cvjet_site_config')) || defaultSiteConfig;
@@ -703,6 +709,22 @@
         var defaultJobs = JSON.parse(localStorage.getItem('cvjet_saved_jobs')) || initialJobs;
         var activeSubscriptions = JSON.parse(localStorage.getItem('cvjet_saved_subs')) || initialSubscriptions;
         var currentJobs = defaultJobs.slice();
+
+        // Toggle Desktop <-> Mobile View Feature
+        function toggleDesktopMobileView() {
+            isDesktopView = !isDesktopView;
+            var meta = document.getElementById('viewportMeta');
+            var icon = document.getElementById('viewToggleIcon');
+            if (isDesktopView) {
+                meta.setAttribute('content', 'width=1280');
+                icon.className = 'fa-solid fa-mobile-screen';
+                alert('🖥️ تم التحويل إلى وضع سطح المكتب (Desktop View)');
+            } else {
+                meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover');
+                icon.className = 'fa-solid fa-desktop';
+                alert('📱 تم العودة إلى وضع الموبايل المتجاوب (Mobile View)');
+            }
+        }
 
         function persistAllData() {
             localStorage.setItem('cvjet_site_config', JSON.stringify(siteConfig));
@@ -1161,37 +1183,7 @@
     </script>
 </body>
 </html>
-                '<td class="p-3 font-mono font-bold text-purple-700">' + s.code + '</td>' +
-                    '<td class="p-3 text-center"><button onclick="deleteClientCode(' + i + ')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-bold">حذف</button></td>';
-                tbody.appendChild(tr);
-            }
-        }
-
-        function redeemCode() {
-            var acc = document.getElementById('userAccountInput').value.trim();
-            var code = document.getElementById('activationCodeInput').value.trim().toUpperCase();
-            var found = null;
-            for (var i = 0; i < activeSubscriptions.length; i++) {
-                if (activeSubscriptions[i].account === acc && activeSubscriptions[i].code === code) {
-                    found = activeSubscriptions[i];
-                    break;
-                }
-            }
-            if (found) {
-                isPro = true;
-                currentUserAccount = acc;
-                localStorage.setItem('cvjet_is_pro', 'true');
-                localStorage.setItem('cvjet_user_acc', acc);
-                updateProBadgeUI();
-                closeRedeemModal();
-                renderJobs();
-                alert('🎉 تم تفعيل اشتراك Pro لمدة 3 شهور بنجاح!');
-            } else {
-                alert('❌ بيانات الحساب أو كود التفعيل غير صحيحة.');
-            }
-        }
-
-        function updateProBadgeUI() {
+eProBadgeUI() {
             if (isPro) {
                 var badge = document.getElementById('user-badge-status');
                 badge.className = 'bg-emerald-400 text-slate-950 px-2.5 py-0.5 rounded-lg font-black';
