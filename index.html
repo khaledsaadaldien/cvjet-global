@@ -2,850 +2,1404 @@
 <html lang="ar" dir="rtl" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>CVJet-Global.co | Global Job Matcher & Advanced ATS Suite</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; overflow-x: hidden; margin: 0; }
         .blur-job { filter: blur(6px); user-select: none; pointer-events: none; }
-        .modal-overlay { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+        }
         .modal-overlay.hidden { display: none !important; }
+        .modal-box {
+            width: 100%;
+            max-height: calc(100dvh - 32px);
+            overflow-y: auto;
+            border-radius: 24px;
+            background: #ffffff;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        input, select, textarea { font-size: 16px !important; }
+        .grid-bg {
+            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 36px 36px;
+        }
     </style>
 </head>
-<body class="text-slate-900 antialiased min-h-screen flex flex-col pb-20 md:pb-0">
+<body class="text-slate-900 antialiased min-h-screen flex flex-col pb-20 lg:pb-0">
 
-    <!-- Top Navigation -->
-    <header class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3 space-x-reverse">
-                <div onclick="openAdmin()" class="bg-blue-600 text-white p-2.5 rounded-2xl font-black text-xl flex items-center justify-center w-12 h-12 shadow-lg cursor-pointer" title="لوحة التحكم">
+    <!-- Top Announcement Banner -->
+    <div class="bg-blue-700 text-white text-xs py-2 px-4 text-center font-semibold">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-2">
+            <span id="top-bar-text">هل تبحث عن فرص عمل دولية بدعم الفيزا أو فحص سيرتك الذاتية؟ نرحب بك في منصتنا العالمية.</span>
+            <button onclick="openPaymentModal()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-0.5 rounded-full text-[11px] font-bold transition" id="top-bar-btn">اشترك الآن 👑</button>
+        </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex justify-between items-center gap-2">
+            <!-- Brand & Mobile Menu Trigger -->
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <button onclick="toggleMobileDrawer()" class="lg:hidden w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 text-lg transition" aria-label="Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div onclick="secretAdminTrigger()" class="bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-2xl font-black text-xl sm:text-2xl flex items-center justify-center shadow-md cursor-pointer transition shrink-0" title="اضغط 5 مرات للوصول للوحة المالك">
                     <i class="fa-solid fa-globe"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-black tracking-tight text-slate-900">CVJet-<span class="text-blue-600">Global.co</span></h1>
-                    <p class="text-xs text-slate-500">195 دولة | منصة التوظيف وفحص الـ ATS الشاملة</p>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-base sm:text-xl font-black tracking-tight text-slate-900">CVJet-<span class="text-blue-600">Global.co</span></h1>
+                        <span class="hidden sm:inline-flex items-center gap-1 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-slate-700">🌍 195 دولة</span>
+                    </div>
+                    <p class="text-[10px] sm:text-xs text-slate-500 font-medium line-clamp-1" id="hdr-sub">منصة التوظيف الدولي وفحص الـ ATS الشاملة</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 space-x-reverse">
-                <button onclick="openRedeemModal()" class="bg-emerald-600 text-white px-4 py-2 rounded-2xl font-bold text-xs shadow-md">تفعيل كود 🔑</button>
-                <button onclick="openPaymentModal()" class="bg-blue-600 text-white px-4 py-2 rounded-2xl font-bold text-xs shadow-md">اشتراك 8$ 👑</button>
+
+            <!-- Desktop Quick Links -->
+            <nav class="hidden xl:flex items-center gap-6 text-sm font-bold text-slate-600">
+                <a href="#jobsSection" class="hover:text-blue-600 transition" id="nav-jobs">الوظائف المتاحة</a>
+                <a href="javascript:void(0)" onclick="quickFilterMode('remote')" class="hover:text-blue-600 transition" id="nav-remote">عمل عن بُعد</a>
+                <a href="javascript:void(0)" onclick="openAtsScannerModal()" class="hover:text-blue-600 transition" id="nav-ats">فحص ATS المجاني</a>
+                <a href="#companiesSection" class="hover:text-blue-600 transition" id="nav-companies">دليل الشركات</a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+                <button onclick="toggleLanguage()" id="langBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 sm:px-3.5 py-2 rounded-xl font-bold transition text-xs border border-slate-200">
+                    🌐 EN
+                </button>
+                <button onclick="openRedeemModal()" id="btn-redeem-nav" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 sm:px-4 py-2 rounded-xl font-bold transition shadow-sm text-xs flex items-center gap-1">
+                    <i class="fa-solid fa-key"></i> <span id="txt-redeem-nav">تفعيل كود</span>
+                </button>
+                <button onclick="openPaymentModal()" id="btn-pricing-nav" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-2.5 sm:px-4 py-2 rounded-xl font-black transition shadow-sm text-xs flex items-center gap-1">
+                    <i class="fa-solid fa-crown"></i> <span class="hidden md:inline" id="txt-pricing-nav">اشتراك 8$ / 3 شهور</span><span class="md:hidden">8$ Pro</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Hero Banner -->
-    <section class="bg-slate-900 text-white py-14 px-6 text-center space-y-6">
-        <div class="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 px-5 py-2 rounded-full text-blue-400 text-xs font-bold">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> مطابقة وظائف بالذكاء الاصطناعي
-        </div>
-        <h2 class="text-3xl md:text-5xl font-black max-w-3xl mx-auto leading-tight">ارفع سيرتك الذاتية ونجد لك الوظائف الأنسب</h2>
-        <p class="text-slate-300 text-sm md:text-base max-w-2xl mx-auto">نقرأ سيرتك ونطابقها مع آلاف الوظائف العالمية والمحلية ودعم تأشيرة العمل بدقة فائقة.</p>
-        <button onclick="openAtsScannerModal()" class="bg-green-500 hover:bg-green-400 text-slate-950 px-8 py-4 rounded-2xl font-black text-sm shadow-xl transition">
-            افحص سيرتك الذاتية مجاناً 📊
-        </button>
-    </section>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 py-8 w-full grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <aside class="lg:col-span-1 space-y-6">
-            <div class="bg-gradient-to-br from-blue-950 to-slate-900 text-white p-6 rounded-3xl shadow-xl space-y-4 border border-blue-500/30">
-                <span class="bg-amber-400 text-slate-950 text-xs font-black px-3 py-1 rounded-full uppercase">PRO حصرياً</span>
-                <h4 class="text-base font-bold text-amber-300"><i class="fa-solid fa-file-lines ml-1"></i> خدمة تصميم CV احترافي</h4>
-                <p class="text-xs text-slate-300 leading-relaxed">نصمم سيرتك بكل اللغات ومطابقة تماماً لأنظمة الفرز الآلي (ATS).</p>
-                <button onclick="openAtsModal()" class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs py-3 rounded-2xl font-black shadow transition">اطلب سيرتك الآن</button>
-            </div>
-        </aside>
-
-        <div class="lg:col-span-3 space-y-6">
-            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex justify-between items-center">
-                <span class="text-base font-bold text-slate-800">نتائج الوظائف المتاحة (8 وظائف كبرى)</span>
-                <span class="text-xs bg-emerald-100 text-emerald-800 px-4 py-1.5 rounded-full font-bold">● 5 مجانية و 3 Pro</span>
-            </div>
-            <div id="jobsContainer" class="space-y-4"></div>
-        </div>
-    </main>
-
-    <!-- Mobile Bottom Nav -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 px-6 py-3 flex justify-around items-center text-xs text-slate-700 shadow-2xl">
-        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center gap-1.5 text-blue-600 font-bold"><i class="fa-solid fa-house text-lg"></i><span>الرئيسية</span></button>
-        <button onclick="openAtsScannerModal()" class="flex flex-col items-center gap-1.5 hover:text-blue-600"><i class="fa-solid fa-file-lines text-lg"></i><span>سيرتي</span></button>
-        <button onclick="openRedeemModal()" class="flex flex-col items-center gap-1.5 hover:text-blue-600"><i class="fa-solid fa-key text-lg"></i><span>تفعيل</span></button>
-        <button onclick="openPaymentModal()" class="flex flex-col items-center gap-1.5 hover:text-blue-600"><i class="fa-solid fa-crown text-lg"></i><span>الاشتراك</span></button>
-    </nav>
-
-    <!-- Modals -->
-    <div id="atsScannerModal" class="modal-overlay hidden"><div class="bg-white rounded-3xl max-w-lg w-full p-8 space-y-5 relative shadow-2xl"><button onclick="closeModal('atsScannerModal')" class="absolute top-5 left-5 text-xl"><i class="fa-solid fa-xmark"></i></button><h3 class="font-black text-lg">فحص مطابقة ATS</h3><input type="text" placeholder="المسمى الوظيفي المستهدف..." class="w-full border rounded-2xl px-4 py-3 text-sm"><button onclick="alert('تم فحص السيرة بنجاح - نسبة المطابقة 94%!')" class="w-full bg-emerald-600 text-white py-3.5 rounded-2xl font-bold text-sm shadow">بدء الفحص ⚡</button></div></div>
-    
-    <div id="atsModal" class="modal-overlay hidden"><div class="bg-white rounded-3xl max-w-lg w-full p-8 space-y-5 relative shadow-2xl"><button onclick="closeModal('atsModal')" class="absolute top-5 left-5 text-xl"><i class="fa-solid fa-xmark"></i></button><h3 class="font-black text-lg">طلب تصميم CV احترافي (ATS)</h3><input type="text" placeholder="الاسم الكامل..." class="w-full border rounded-2xl px-4 py-3 text-sm"><select class="w-full border rounded-2xl px-4 py-3 text-sm"><option>العربية والإنجليزية معا (Bilingual)</option><option>اللغة الإنجليزية فقط</option></select><button onclick="alert('تم إرسال طلبك بنجاح!')" class="w-full bg-blue-600 text-white py-3.5 rounded-2xl font-bold text-sm shadow">إرسال الطلب</button></div></div>
-
-    <div id="redeemModal" class="modal-overlay hidden"><div class="bg-white rounded-3xl max-w-md w-full p-8 space-y-5 relative shadow-2xl"><button onclick="closeModal('redeemModal')" class="absolute top-5 left-5 text-xl"><i class="fa-solid fa-xmark"></i></button><h3 class="font-black text-lg">تفعيل كود Pro</h3><input type="text" placeholder="رقم الموبايل أو الإيميل..." class="w-full border rounded-2xl px-4 py-3 text-sm"><input type="text" placeholder="كود التفعيل..." class="w-full border rounded-2xl px-4 py-3 text-sm uppercase font-mono text-center"><button onclick="isPro=true; closeModal('redeemModal'); renderJobs(); alert('تم التفعيل بنجاح!');" class="w-full bg-green-600 text-white py-3.5 rounded-2xl font-bold text-sm shadow">تفعيل الحساب</button></div></div>
-
-    <div id="paymentModal" class="modal-overlay hidden"><div class="bg-white rounded-3xl max-w-lg w-full p-8 space-y-5 relative shadow-2xl"><button onclick="closeModal('paymentModal')" class="absolute top-5 left-5 text-xl"><i class="fa-solid fa-xmark"></i></button><h3 class="font-black text-lg">طرق دفع اشتراك 8$ / 3 شهور</h3><div class="bg-blue-50 p-4 rounded-2xl text-xs space-y-2"><p class="text-sm"><b>فودافون كاش:</b> 01020073082</p><p class="text-sm"><b>إنستاباي:</b> ksaadaldien@instapay.com</p></div><input type="text" placeholder="رقم إيصال التحويل..." class="w-full border rounded-2xl px-4 py-3 text-sm"><button onclick="alert('تم إرسال طلب الكود بنجاح!')" class="w-full bg-purple-700 text-white py-3.5 rounded-2xl font-bold text-sm shadow">إرسال الطلب</button></div></div>
-
-    <div id="adminModal" class="modal-overlay hidden"><div class="bg-white rounded-3xl max-w-lg w-full p-8 space-y-5 relative shadow-2xl"><button onclick="closeModal('adminModal')" class="absolute top-5 left-5 text-xl"><i class="fa-solid fa-xmark"></i></button><h3 class="font-black text-lg">لوحة تحكم المالك</h3><div class="space-y-3 text-xs"><input type="text" id="jTitle" placeholder="المسمى الوظيفي" class="w-full border rounded-2xl px-4 py-3 text-sm"><input type="text" id="jComp" placeholder="اسم الشركة" class="w-full border rounded-2xl px-4 py-3 text-sm"><input type="text" id="jLogo" placeholder="رابط شعار الشركة Logo" class="w-full border rounded-2xl px-4 py-3 text-sm"><button onclick="addNewJob()" class="w-full bg-purple-700 text-white py-3.5 rounded-2xl font-bold text-sm shadow">إضافة ونشر الوظيفة</button></div></div></div>
-
-    <!-- Script -->
-    <script>
-        let isPro = false;
-        let jobs = [
-            { title: "Senior Electrical Power Engineer", company: "Siemens Energy", logo: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=100", location: "Munich, ألمانيا 🇩🇪", salary: "€75,000 / year", visa: true, desc: "High voltage substation maintenance and grid design with full relocation & visa sponsorship." },
-            { title: "Solar PV & BESS Site Engineer", company: "NEOM Green Energy", logo: "https://images.unsplash.com/photo-1509391365360-e835f377e8be?w=100", location: "Tabuk, السعودية 🇸🇦", salary: "$4,500 / month", visa: true, desc: "Supervising solar photovoltaic and battery energy storage systems installation." },
-            { title: "SCADA & PLC Automation Specialist", company: "Schneider Electric", logo: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100", location: "Dubai, الإمارات 🇦🇪", salary: "AED 18,000 / month", visa: true, desc: "Programming and commissioning SCADA and PLC control panels for mega industrial projects." },
-            { title: "Electrical Distribution Engineer", company: "Tesla Gigafactory", logo: "https://images.unsplash.com/photo-1563770660941-20978e870e26?w=100", location: "Austin, Texas, أمريكا 🇺🇸", salary: "$110,000 / year", visa: true, desc: "Power distribution systems design and testing for manufacturing Gigafactories." },
-            { title: "Automation Lead Engineer", company: "ABB", logo: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=100", location: "Doha, قطر 🇶🇦", salary: "QAR 24,000 / month", visa: true, desc: "Leading industrial automation and SCADA migration projects in oil & gas." },
-            { title: "Senior Renewable Energy Consultant", company: "TotalEnergies", logo: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=100", location: "Paris, فرنسا 🇫🇷", salary: "€90,000 / year", visa: true, desc: "Managing utility-scale solar and wind energy projects across EMEA region." },
-            { title: "Software & Cloud Architect", company: "ASML", logo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=100", location: "Eindhoven, هولندا 🇳🇱", salary: "€95,000 / year", visa: true, desc: "Cloud infrastructure and automated software deployment systems." },
-            { title: "AI Research Engineer", company: "DeepMind", logo: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=100", location: "London, بريطانيا 🇬🇧", salary: "£120,000 / year", visa: true, desc: "Machine learning model development and neural network architecture." }
-        ];
-
-        function renderJobs() {
-            let container = document.getElementById('jobsContainer');
-            container.innerHTML = '';
-            jobs.forEach((job, index) => {
-                let locked = !isPro && index >= 5; // أول 5 وظائف ظاهرة ومتاحة، وباقي الوظائف مقفلة
-                let div = document.createElement('div');
-                div.className = "bg-white p-6 rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden";
-                div.innerHTML = `
-                    <div class="flex items-start gap-4 ${locked ? 'blur-job' : ''}">
-                        <img src="${job.logo}" class="w-14 h-14 rounded-2xl object-cover border shadow-sm">
-                        <div class="flex-grow">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <span class="text-xs bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-xl">${job.company}</span>
-                                    <h4 class="text-lg font-bold text-slate-900 mt-2">${job.title}</h4>
-                                    <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot text-red-500 ml-1"></i> ${job.location} | ${job.salary}</p>
-                                    <p class="text-xs text-slate-600 mt-2 leading-relaxed">${job.desc}</p>
-                                </div>
-                                <div>${job.visa ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full"><i class="fa-solid fa-plane"></i> Visa</span>' : ''}</div>
-                            </div>
-                        </div>
-                    </div>
-                    ${locked ? `<div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center text-white p-4 text-center space-y-3"><i class="fa-solid fa-lock text-amber-400 text-2xl"></i><p class="text-xs font-bold">هذه الوظيفة تتطلب اشتراك Pro (3 شهور)</p><button onclick="openRedeemModal()" class="bg-amber-400 text-slate-950 px-5 py-2.5 rounded-2xl text-xs font-black shadow">أدخل كود التفعيل 🔑</button></div>` : ''}
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function addNewJob() {
-            let title = document.getElementById('jTitle').value;
-            let company = document.getElementById('jComp').value;
-            let logo = document.getElementById('jLogo').value || 'https://images.unsplash.com/photo-1541888946425-d0fbb18f249d?w=100';
-            if(!title || !company) return alert('أدخل الحقول المطلوبة');
-            jobs.unshift({ title, company, logo, location: "عالمي 🌍", salary: "محدد", visa: true, desc: "وظيفة جديدة أضيفت بواسطة الأدمن." });
-            renderJobs();
-            closeModal('adminModal');
-            alert('تمت إضافة الوظيفة بنجاح!');
-        }
-
-        function openAdmin() {
-            let pass = prompt("أدخل كلمة مرور الأدمن (admin123):");
-            if(pass === "admin123") document.getElementById('adminModal').classList.remove('hidden');
-            else if(pass !== null) alert('كلمة المرور غير صحيحة!');
-        }
-
-        function openRedeemModal() { document.getElementById('redeemModal').classList.remove('hidden'); }
-        function openPaymentModal() { document.getElementById('paymentModal').classList.remove('hidden'); }
-        function openAtsScannerModal() { document.getElementById('atsScannerModal').classList.remove('hidden'); }
-        function openAtsModal() { document.getElementById('atsModal').classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        renderJobs();
-    </script>
-</body>
-</html>
-ة الآن 📊
-                    </button>
+    <!-- Mobile Slide-Over Menu Drawer -->
+    <div id="mobileDrawer" class="fixed inset-0 bg-slate-950/75 z-50 hidden backdrop-blur-sm">
+        <div class="bg-white w-72 max-w-[85vw] h-full p-6 flex flex-col justify-between shadow-2xl">
+            <div class="space-y-6">
+                <div class="flex justify-between items-center border-b pb-4">
+                    <span class="font-black text-lg text-slate-900">CVJet-<span class="text-blue-600">Global</span></span>
+                    <button onclick="toggleMobileDrawer()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-2 text-sm font-bold text-slate-700">
+                    <a href="javascript:void(0)" onclick="toggleMobileDrawer(); window.scrollTo({top:0,behavior:'smooth'})" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 hover:text-blue-600"><i class="fa-solid fa-house w-5"></i> الرئيسية</a>
+                    <a href="#jobsSection" onclick="toggleMobileDrawer()" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 hover:text-blue-600"><i class="fa-solid fa-briefcase w-5"></i> تصفح الوظائف</a>
+                    <a href="javascript:void(0)" onclick="toggleMobileDrawer(); quickFilterMode('remote')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 hover:text-blue-600"><i class="fa-solid fa-laptop-code w-5"></i> وظائف عن بُعد</a>
+                    <a href="javascript:void(0)" onclick="toggleMobileDrawer(); openAtsScannerModal()" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 hover:text-blue-600"><i class="fa-solid fa-wand-magic-sparkles w-5"></i> فحص مطابقة ATS</a>
+                    <a href="javascript:void(0)" onclick="toggleMobileDrawer(); openAtsModal()" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 hover:text-blue-600"><i class="fa-solid fa-file-shield w-5"></i> تصميم CV احترافي</a>
+                    <a href="#companiesSection" onclick="toggleMobileDrawer()" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 hover:text-blue-600"><i class="fa-solid fa-building w-5"></i> دليل الشركات</a>
                 </div>
             </div>
-        </aside>
-
-        <!-- Job Listings & Paywall Section -->
-        <div class="lg:col-span-3 space-y-4">
-            <div class="flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-slate-200">
-                <span class="text-sm font-bold text-slate-700" id="jobs-header-title">نتائج الوظائف المتاحة</span>
-                <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-semibold" id="jobs-header-sub">● جاري تحديث العدد...</span>
-            </div>
-
-            <!-- Job Cards Container -->
-            <div id="jobsContainer" class="space-y-4">
-                <!-- Populated via JavaScript -->
+            <div class="space-y-2 pt-4 border-t">
+                <button onclick="toggleMobileDrawer(); openRedeemModal()" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-xs">تفعيل كود الاشتراك 🔑</button>
+                <button onclick="toggleMobileDrawer(); openPaymentModal()" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-bold text-xs">اشترك بـ 8$ لمدة 3 شهور 👑</button>
             </div>
         </div>
-    </main>
+    </div>
 
-    <!-- Top Hiring Companies Section -->
-    <section class="max-w-7xl mx-auto px-4 py-8 w-full space-y-6">
-        <div class="flex justify-between items-center">
-            <h3 class="text-lg font-black text-slate-900">بعض من أبرز الشركات التي تحتاج إليك الآن</h3>
-            <span class="text-xs font-bold text-slate-500">دليل الشركات الموثوقة</span>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-white p-5 rounded-3xl border border-slate-200 text-center space-y-2 shadow-sm">
-                <div class="w-12 h-12 bg-slate-100 rounded-2xl mx-auto flex items-center justify-center font-bold text-blue-600"><i class="fa-solid fa-hotel text-lg"></i></div>
-                <h4 class="font-bold text-sm text-slate-900">St. Regis Hotels</h4>
-                <span class="text-[11px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold">20 وظيفة متاحة</span>
-            </div>
-            <div class="bg-white p-5 rounded-3xl border border-slate-200 text-center space-y-2 shadow-sm">
-                <div class="w-12 h-12 bg-slate-100 rounded-2xl mx-auto flex items-center justify-center font-bold text-amber-600"><i class="fa-solid fa-star text-lg"></i></div>
-                <h4 class="font-bold text-sm text-slate-900">Sheraton Hotels</h4>
-                <span class="text-[11px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold">18 وظيفة متاحة</span>
-            </div>
-            <div class="bg-white p-5 rounded-3xl border border-slate-200 text-center space-y-2 shadow-sm">
-                <div class="w-12 h-12 bg-slate-100 rounded-2xl mx-auto flex items-center justify-center font-bold text-red-600"><i class="fa-solid fa-truck-fast text-lg"></i></div>
-                <h4 class="font-bold text-sm text-slate-900">Aramex Logistics</h4>
-                <span class="text-[11px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold">15 وظيفة متاحة</span>
-            </div>
-            <div class="bg-white p-5 rounded-3xl border border-slate-200 text-center space-y-2 shadow-sm">
-                <div class="w-12 h-12 bg-slate-100 rounded-2xl mx-auto flex items-center justify-center font-bold text-indigo-600"><i class="fa-solid fa-bolt text-lg"></i></div>
-                <h4 class="font-bold text-sm text-slate-900">Siemens Energy</h4>
-                <span class="text-[11px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold">12 وظيفة متاحة</span>
+    <!-- WhatsApp Community Banner -->
+    <section class="bg-slate-900 pt-6 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-blue-950 border border-emerald-500/30 rounded-3xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+                <div class="flex items-center gap-4 text-center sm:text-right flex-col sm:flex-row">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-green-500 text-slate-950 flex items-center justify-center text-2xl sm:text-3xl shadow-md shrink-0">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-emerald-400 font-bold block" id="wa-sub">فرص العمل العالمية والخليجية</span>
+                        <h3 class="text-white font-black text-base sm:text-lg" id="wa-title">انضم لمجموعة الوظائف الحصرية على واتساب</h3>
+                        <p class="text-slate-300 text-xs mt-0.5" id="wa-desc">تابع أحدث الوظائف الموثوقة ودعم تأشيرة العمل فور نشرها من مكان واحد</p>
+                    </div>
+                </div>
+                <a href="https://whatsapp.com" target="_blank" class="w-full sm:w-auto text-center bg-green-500 hover:bg-green-400 text-slate-950 font-black px-6 py-3 rounded-2xl text-xs sm:text-sm transition shadow-md shrink-0">
+                    <span id="wa-btn">انضم الآن</span> <i class="fa-solid fa-arrow-left mr-1"></i>
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- Bottom Navigation Bar for Mobile -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 px-4 py-2 flex justify-around items-center text-xs text-slate-600">
-        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center gap-1 text-blue-600 font-bold">
+    <!-- Hero & AI ATS Matcher Section -->
+    <section class="bg-slate-900 text-white py-10 sm:py-16 px-4 sm:px-6 lg:px-8 grid-bg relative border-b border-slate-800">
+        <div class="max-w-5xl mx-auto text-center space-y-6">
+            <!-- Top Badge -->
+            <div class="inline-flex items-center gap-2 bg-blue-500/15 border border-blue-400/30 px-4 py-1.5 rounded-full text-blue-300 text-xs font-bold">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="hero-badge">مطابقة وظائف بالذكاء الاصطناعي وفحص ATS</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight" id="hero-title">
+                ارفع سيرتك الذاتية ونجد لك <span class="text-emerald-400">الوظائف الأنسب</span>
+            </h2>
+            <p class="text-slate-300 text-xs sm:text-base max-w-2xl mx-auto leading-relaxed" id="hero-desc">
+                نقرأ سيرتك الذاتية ونستخرج خبراتك ومهاراتك وتخصصك، ثم نطابقها مع الوظائف المنشورة في 195 دولة مع دعم تأشيرة العمل ونعرض لك نسبة التوافق فوراً.
+            </p>
+
+            <!-- User Status & Live Counters Bar -->
+            <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 pt-1">
+                <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/15 px-3.5 py-1.5 rounded-2xl text-xs">
+                    <span class="text-slate-300" id="status-label">الحالة:</span>
+                    <span id="user-badge-status" class="bg-amber-400 text-slate-950 px-2.5 py-0.5 rounded-lg font-black">مجاني (Free)</span>
+                    <span id="timer-display" class="text-emerald-300 font-mono text-[11px]"></span>
+                </div>
+                <div class="inline-flex items-center gap-2 bg-slate-950/70 border border-white/10 px-3.5 py-1.5 rounded-2xl text-xs font-mono">
+                    <i class="fa-solid fa-eye text-blue-400"></i>
+                    <span id="lbl-visitors">الزيارات:</span> <strong id="totalVisitorsCount" class="text-white">25,893</strong>
+                </div>
+                <div class="inline-flex items-center gap-2 bg-slate-950/70 border border-white/10 px-3.5 py-1.5 rounded-2xl text-xs font-mono">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
+                    <span id="lbl-online">متصل الآن:</span> <strong id="onlineUsersCount" class="text-green-400">14</strong>
+                </div>
+            </div>
+
+            <!-- Interactive Upload Card -->
+            <div class="bg-slate-800/90 border border-slate-700 p-5 sm:p-8 rounded-3xl shadow-2xl max-w-2xl mx-auto space-y-5 backdrop-blur">
+                <div onclick="openAtsScannerModal()" class="border-2 border-dashed border-slate-600 hover:border-emerald-400 rounded-2xl p-6 sm:p-8 transition cursor-pointer bg-slate-900/60 group">
+                    <div class="w-14 h-14 bg-emerald-500/20 text-emerald-400 group-hover:scale-110 transition rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h3 class="font-bold text-sm sm:text-base text-white mb-1" id="upload-box-title">ارفع سيرتك الذاتية وابدأ المطابقة الآن</h3>
+                    <p class="text-xs text-slate-400" id="upload-box-sub">PDF أو DOC أو DOCX حتى 10 ميجابايت – اضغط هنا للفحص الفوري</p>
+                    <button class="mt-4 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs sm:text-sm shadow transition inline-flex items-center gap-2">
+                        <i class="fa-solid fa-upload"></i> <span id="upload-box-btn">ارفع سيرتك الذاتية</span>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs text-slate-300 text-right sm:text-center">
+                    <div class="flex items-center sm:justify-center gap-2 bg-slate-900/50 p-2.5 rounded-xl"><i class="fa-solid fa-bolt text-amber-400"></i> <span id="feat-1">تحليل خلال دقيقة</span></div>
+                    <div class="flex items-center sm:justify-center gap-2 bg-slate-900/50 p-2.5 rounded-xl"><i class="fa-solid fa-shield-halved text-emerald-400"></i> <span id="feat-2">بياناتك خاصة بك</span></div>
+                    <div class="flex items-center sm:justify-center gap-2 bg-slate-900/50 p-2.5 rounded-xl"><i class="fa-solid fa-circle-check text-blue-400"></i> <span id="feat-3">معايير ATS عالمية</span></div>
+                </div>
+            </div>
+
+            <!-- Quick Pill Filters under Hero -->
+            <div class="flex flex-wrap justify-center gap-2 pt-2">
+                <a href="#jobsSection" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-full text-xs font-bold transition shadow">تصفح كل الوظائف ←</a>
+                <button onclick="quickFilterMode('remote')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-full text-xs font-semibold transition">💻 عن بُعد (Remote)</button>
+                <button onclick="quickFilterVisa()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-full text-xs font-semibold transition">✈️ دعم تأشيرة العمل (Visa)</button>
+                <button onclick="quickFilterCountry('gcc')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-full text-xs font-semibold transition">🇸🇦 وظائف الخليج</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Workspace: Sidebar Filters + Jobs Feed -->
+    <main id="jobsSection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full flex-grow">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            
+            <!-- Sidebar (4 Columns on Desktop, Full Width on Mobile) -->
+            <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+                
+                <!-- Pro Exclusive CV Writing Service Card (Exact Requested Design) -->
+                <div class="bg-gradient-to-br from-indigo-950 via-blue-950 to-slate-900 text-white p-5 sm:p-6 rounded-3xl shadow-xl relative overflow-hidden border border-indigo-500/30 space-y-3.5">
+                    <div class="flex justify-between items-center">
+                        <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" id="badge-pro-lbl">
+                            PRO حصرياً
+                        </span>
+                        <i class="fa-solid fa-file-shield text-amber-400 text-xl"></i>
+                    </div>
+                    <h4 class="text-base sm:text-lg font-black text-amber-300" id="ats-title">
+                        خدمة تصميم CV احترافي
+                    </h4>
+                    <p class="text-xs text-slate-200 leading-relaxed" id="ats-desc">
+                        نصمم ونكتب لك سيرة ذاتية احترافية مطابقة لأنظمة الفرز الآلي (ATS)، متاحة بكل اللغات لتناسب الشركات العالمية والخليجية.
+                    </p>
+                    <button onclick="openAtsModal()" id="ats-btn" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm py-3 rounded-2xl font-black transition shadow-md flex items-center justify-center gap-2">
+                        <span id="ats-btn-txt">اطلب سيرتك الذاتية الآن</span> 📝
+                    </button>
+                </div>
+
+                <!-- Advanced Job Filters Box -->
+                <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-blue-600"></i> <span id="filter-title">تصفية الوظائف</span>
+                        </h3>
+                        <button onclick="resetFilters()" class="text-xs text-blue-600 hover:underline font-bold" id="btn-reset">إعادة ضبط</button>
+                    </div>
+
+                    <!-- Search Keyword -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700" id="lbl-search">المسمى الوظيفي أو المجال</label>
+                        <div class="relative">
+                            <input type="text" id="searchInput" oninput="filterJobs()" placeholder="مثال: Electrical, SCADA, Solar..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-600 pr-9">
+                            <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3.5 text-slate-400 text-xs"></i>
+                        </div>
+                    </div>
+
+                    <!-- Region / Country Select -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700" id="lbl-country">الدولة / الإقليم</label>
+                        <select id="countrySelect" onchange="filterJobs()" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-600">
+                            <option value="all" id="opt-all">🌍 كل العالم (195 دولة)</option>
+                            <option value="gcc" id="opt-gcc">🇸🇦 دول الخليج (السعودية، الإمارات، قطر)</option>
+                            <option value="europe" id="opt-europe">🇪🇺 أوروبا (ألمانيا، فرنسا، هولندا، بريطانيا)</option>
+                            <option value="usa" id="opt-usa">🇺🇸 أمريكا وكندا</option>
+                            <option value="egypt" id="opt-egypt">🇪🇬 مصر</option>
+                        </select>
+                    </div>
+
+                    <!-- Quick Destination Buttons -->
+                    <div class="space-y-2 pt-1">
+                        <label class="text-xs font-bold text-slate-700 block" id="lbl-quick-dest">وجهات سريعة:</label>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button onclick="quickFilterCountry('saudi')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-[11px] font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 transition">🇸🇦 السعودية</button>
+                            <button onclick="quickFilterCountry('uae')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-[11px] font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 transition">🇦🇪 الإمارات</button>
+                            <button onclick="quickFilterCountry('qatar')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-[11px] font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 transition">🇶🇦 قطر</button>
+                            <button onclick="quickFilterCountry('germany')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-[11px] font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 transition">🇩🇪 ألمانيا</button>
+                            <button onclick="quickFilterCountry('netherlands')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-[11px] font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 transition">🇳🇱 هولندا</button>
+                            <button onclick="quickFilterCountry('usa')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-[11px] font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 transition">🇺🇸 أمريكا</button>
+                        </div>
+                    </div>
+
+                    <!-- Work Mode & Level -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-600 block mb-1">نمط العمل</label>
+                            <select id="workModeSelect" onchange="filterJobs()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs focus:outline-none focus:border-blue-600">
+                                <option value="all" id="opt-mode-all">أي نمط</option>
+                                <option value="onsite" id="opt-mode-onsite">حضوري (On-site)</option>
+                                <option value="remote" id="opt-mode-remote">عن بُعد (Remote)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-600 block mb-1">المستوى المهني</label>
+                            <select id="careerLevelSelect" onchange="filterJobs()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs focus:outline-none focus:border-blue-600">
+                                <option value="all" id="opt-level-all">كل المستويات</option>
+                                <option value="mid" id="opt-level-mid">متوسط (Mid-Level)</option>
+                                <option value="senior" id="opt-level-sen">خبير (Senior)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Visa Checkbox -->
+                    <label class="flex items-center cursor-pointer select-none p-3 bg-blue-50/80 hover:bg-blue-100/80 rounded-2xl transition border border-blue-200/80">
+                        <input type="checkbox" id="visaFilter" onchange="filterJobs()" class="w-4 h-4 text-blue-600 rounded">
+                        <span class="mr-2.5 text-xs font-bold text-blue-950" id="lbl-visa">✈️ يدعم تأشيرة العمل (Visa Sponsorship)</span>
+                    </label>
+
+                    <button onclick="filterJobs()" id="btn-search-action" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-bold transition shadow-md flex items-center justify-center gap-2 text-xs sm:text-sm">
+                        <i class="fa-solid fa-search"></i> <span>تحديث نتائج البحث</span>
+                    </button>
+                </div>
+
+                <!-- Free ATS Scanner Mini Card -->
+                <div class="bg-gradient-to-br from-emerald-950 to-slate-900 text-white p-5 rounded-3xl space-y-3 shadow-lg border border-emerald-500/30">
+                    <div class="flex justify-between items-center">
+                        <span class="bg-emerald-400 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase" id="badge-free-lbl">مجاني 100%</span>
+                        <i class="fa-solid fa-chart-pie text-emerald-400"></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-emerald-300" id="scanner-title">فحص مجاني لمطابقة ATS</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed" id="scanner-desc">ارفع سيرتك الذاتية واعرف نسبة مطابقتها لأنظمة التوظيف الدولية فوراً.</p>
+                    <button onclick="openAtsScannerModal()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs py-2.5 rounded-xl font-black transition shadow" id="scanner-btn">
+                        افحص سيرتك الذاتية الآن 📊
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Jobs Feed Section (8 Columns on Desktop, Full Width on Mobile) -->
+            <div class="lg:col-span-8 space-y-5">
+                
+                <!-- Feed Header -->
+                <div class="bg-white p-4 sm:p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-3">
+                    <div>
+                        <span class="text-xs font-bold text-blue-600 block">أحدث الفرص العالمية</span>
+                        <h3 class="text-base sm:text-lg font-black text-slate-900" id="jobs-header-title">وظائف أُضيفت حديثاً</h3>
+                    </div>
+                    <span class="text-xs bg-emerald-100 text-emerald-800 px-3.5 py-1.5 rounded-full font-bold" id="jobs-header-sub">● جاري التحميل...</span>
+                </div>
+
+                <!-- Dynamic Jobs Container -->
+                <div id="jobsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4"></div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Work Modes & Categories Section (Wazifny Style) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-6">
+        <div class="text-right">
+            <span class="text-xs font-bold text-blue-600">استكشف حسب نمط العمل</span>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">ما نمط العمل الذي يناسبك؟</h3>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div onclick="quickFilterMode('remote')" class="bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 sm:p-8 rounded-3xl shadow-lg cursor-pointer hover:scale-[1.01] transition flex items-center justify-between">
+                <div class="space-y-2">
+                    <h4 class="text-xl sm:text-2xl font-black">عن بُعد (Remote)</h4>
+                    <p class="text-xs sm:text-sm text-blue-100">اعمل من أي مكان في العالم مع شركات دولية بعملات أجنبية</p>
+                    <span class="inline-block text-xs font-bold bg-white/20 px-4 py-1.5 rounded-xl mt-2">تصفح الوظائف ←</span>
+                </div>
+                <div class="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center text-3xl shrink-0">
+                    <i class="fa-solid fa-laptop-house"></i>
+                </div>
+            </div>
+            <div onclick="quickFilterVisa()" class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-6 sm:p-8 rounded-3xl shadow-lg cursor-pointer hover:scale-[1.01] transition flex items-center justify-between border border-slate-800">
+                <div class="space-y-2">
+                    <h4 class="text-xl sm:text-2xl font-black">عقود عمل وتأشيرة (Visa)</h4>
+                    <p class="text-xs sm:text-sm text-slate-300">فرص هندسية وتقنية مع كفالة التأشيرة وتذاكر الطيران</p>
+                    <span class="inline-block text-xs font-bold bg-emerald-500 text-slate-950 px-4 py-1.5 rounded-xl mt-2">تصفح الوظائف ←</span>
+                </div>
+                <div class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-3xl text-emerald-400 shrink-0">
+                    <i class="fa-solid fa-plane-departure"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Hiring Companies Section -->
+    <section id="companiesSection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full space-y-6">
+        <div class="flex flex-wrap justify-between items-end gap-2">
+            <div>
+                <span class="text-xs font-bold text-blue-600">شركات توظف الآن</span>
+                <h3 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">بعض من أبرز الشركات التي تحتاج إليك الآن</h3>
+            </div>
+            <span class="text-xs font-bold text-slate-500">شركات عالمية موثوقة ✓</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div onclick="searchByCompany('Siemens')" class="bg-white p-5 rounded-3xl border border-slate-200 hover:border-blue-500 transition cursor-pointer text-center space-y-3 shadow-sm">
+                <div class="w-14 h-14 bg-blue-50 text-blue-700 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black"><i class="fa-solid fa-bolt"></i></div>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900">Siemens Energy</h4>
+                    <p class="text-[11px] text-slate-500 mt-0.5">ألمانيا وأوروبا</p>
+                </div>
+                <span class="inline-block text-[11px] bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-bold">14 وظيفة متاحة</span>
+            </div>
+            <div onclick="searchByCompany('NEOM')" class="bg-white p-5 rounded-3xl border border-slate-200 hover:border-blue-500 transition cursor-pointer text-center space-y-3 shadow-sm">
+                <div class="w-14 h-14 bg-emerald-50 text-emerald-700 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black"><i class="fa-solid fa-solar-panel"></i></div>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900">NEOM Green Energy</h4>
+                    <p class="text-[11px] text-slate-500 mt-0.5">المملكة العربية السعودية</p>
+                </div>
+                <span class="inline-block text-[11px] bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-bold">19 وظيفة متاحة</span>
+            </div>
+            <div onclick="searchByCompany('Schneider')" class="bg-white p-5 rounded-3xl border border-slate-200 hover:border-blue-500 transition cursor-pointer text-center space-y-3 shadow-sm">
+                <div class="w-14 h-14 bg-green-50 text-green-700 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black"><i class="fa-solid fa-microchip"></i></div>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900">Schneider Electric</h4>
+                    <p class="text-[11px] text-slate-500 mt-0.5">الإمارات والخليج</p>
+                </div>
+                <span class="inline-block text-[11px] bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold">11 وظيفة متاحة</span>
+            </div>
+            <div onclick="searchByCompany('ABB')" class="bg-white p-5 rounded-3xl border border-slate-200 hover:border-blue-500 transition cursor-pointer text-center space-y-3 shadow-sm">
+                <div class="w-14 h-14 bg-red-50 text-red-600 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black"><i class="fa-solid fa-industry"></i></div>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-900">ABB Automation</h4>
+                    <p class="text-[11px] text-slate-500 mt-0.5">قطر وسويسرا</p>
+                </div>
+                <span class="inline-block text-[11px] bg-red-50 text-red-700 px-3 py-1 rounded-full font-bold">9 وظائف متاحة</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-center py-8 px-4 text-xs border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p id="footer-text">© 2026 CVJet-Global.co. جميع الحقوق محفوظة | 195 دولة ودعم تأشيرة العمل.</p>
+            <div class="flex gap-4">
+                <a href="javascript:void(0)" onclick="openAtsScannerModal()" class="hover:text-white">فحص ATS</a>
+                <a href="javascript:void(0)" onclick="openPaymentModal()" class="hover:text-white">باقة Pro</a>
+                <a href="javascript:void(0)" onclick="openRedeemModal()" class="hover:text-white">تفعيل كود</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Sticky Bottom Navigation Bar (Hidden on Laptop/Desktop) -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 z-40 px-2 py-2 flex justify-around items-center text-[11px] text-slate-600 shadow-lg">
+        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center gap-1 text-blue-600 font-bold px-3 py-1 rounded-xl bg-blue-50/70">
             <i class="fa-solid fa-house text-base"></i>
             <span>الرئيسية</span>
         </button>
-        <button onclick="document.getElementById('jobsContainer').scrollIntoView({behavior:'smooth'})" class="flex flex-col items-center gap-1 hover:text-blue-600">
-            <i class="fa-solid fa-briefcase text-base"></i>
+        <button onclick="document.getElementById('jobsSection').scrollIntoView({behavior:'smooth'})" class="flex flex-col items-center gap-1 hover:text-blue-600 px-2 py-1">
+            <i class="fa-solid fa-magnifying-glass text-base"></i>
             <span>الوظائف</span>
         </button>
-        <button onclick="openAtsScannerModal()" class="flex flex-col items-center gap-1 hover:text-blue-600">
+        <button onclick="openAtsScannerModal()" class="flex flex-col items-center gap-1 hover:text-blue-600 px-2 py-1">
             <i class="fa-solid fa-file-lines text-base"></i>
             <span>سيرتي</span>
         </button>
-        <button onclick="openAtsScannerModal()" class="flex flex-col items-center gap-1 hover:text-blue-600">
+        <button onclick="openAtsModal()" class="flex flex-col items-center gap-1 hover:text-blue-600 px-2 py-1">
             <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
             <span>المطابقات</span>
         </button>
-        <button onclick="openRedeemModal()" class="flex flex-col items-center gap-1 hover:text-blue-600">
-            <i class="fa-solid fa-bookmark text-base"></i>
-            <span>المحفوظة</span>
+        <button onclick="openRedeemModal()" class="flex flex-col items-center gap-1 hover:text-blue-600 px-2 py-1">
+            <i class="fa-solid fa-key text-base"></i>
+            <span>تفعيل Pro</span>
         </button>
     </nav>
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 text-center py-6 text-xs border-t border-slate-800 mt-auto mb-12 md:mb-0">
-        <p>© 2026 CVJet-Global.co. All Rights Reserved. 195 Countries & Visa Sponsorship.</p>
-    </footer>
+    <!-- ================= MODALS ================= -->
 
-    <!-- Free ATS Scanner Modal -->
+    <!-- 1. Free ATS Scanner Modal -->
     <div id="atsScannerModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative max-h-[90vh] overflow-y-auto">
-            <button onclick="closeAtsScannerModal()" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-lg font-black text-slate-900 flex items-center">
-                <i class="fa-solid fa-square-poll-vertical text-emerald-600 ml-2"></i> فحص مجاني لمطابقة السيرة الذاتية مع نظام ATS
+        <div class="modal-box max-w-lg p-6 sm:p-8 space-y-4 relative">
+            <button onclick="closeAtsScannerModal()" class="absolute top-5 left-5 w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-square-poll-vertical text-emerald-600"></i>
+                <span>فحص مجاني لمطابقة السيرة الذاتية مع نظام ATS</span>
             </h3>
-            <p class="text-xs text-slate-500">ارفع ملف سيرتك الذاتية (PDF أو Word) أو الصق محتواها، وحدد المسمى الوظيفي المستهدف لفحص النسبة.</p>
-            
+            <p class="text-xs text-slate-500">ارفع ملف سيرتك الذاتية (PDF أو Word) وحدد المسمى الوظيفي المستهدف لفحص نسبة القبول الفورية.</p>
             <div class="space-y-3 text-xs pt-2">
                 <div>
-                    <label class="font-semibold text-slate-700 block mb-1">المسمى الوظيفي المستهدف:</label>
-                    <input type="text" id="scanJobTitle" placeholder="مثال: Electrical Engineer..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5">
+                    <label class="font-bold text-slate-700 block mb-1">المسمى الوظيفي المستهدف:</label>
+                    <input type="text" id="scanJobTitle" placeholder="مثال: Senior Electrical Power Engineer..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5">
                 </div>
                 <div>
-                    <label class="font-semibold text-slate-700 block mb-1">ملف السيرة الذاتية (PDF / Word):</label>
-                    <input type="file" id="scanCvFile" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-slate-500 file:ml-4 file:py-1 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                    <label class="font-bold text-slate-700 block mb-1">ملف السيرة الذاتية (PDF / DOCX):</label>
+                    <input type="file" id="scanCvFile" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-600">
                 </div>
-                <button onclick="runAtsScan()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-2xl font-bold transition shadow">
+                <button onclick="runAtsScan()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold transition shadow">
                     بدء الفحص والتحليل الفوري ⚡
                 </button>
-
-                <div id="scanResultsArea" class="hidden border border-emerald-200 bg-emerald-50/50 p-4 rounded-2xl space-y-3 mt-4">
+                <div id="scanResultsArea" class="hidden border border-emerald-200 bg-emerald-50 p-4 rounded-2xl space-y-2 mt-3">
                     <div class="flex justify-between items-center border-b border-emerald-200 pb-2">
-                        <span class="font-bold text-emerald-900">نتيجة مطابقة نظام ATS:</span>
-                        <span id="scanScoreBadge" class="bg-emerald-600 text-white px-3 py-1 rounded-full font-black text-sm">0%</span>
+                        <span class="font-bold text-emerald-950">نتيجة مطابقة نظام ATS:</span>
+                        <span id="scanScoreBadge" class="bg-emerald-600 text-white px-3 py-0.5 rounded-full font-black text-sm">0%</span>
                     </div>
-                    <div class="space-y-2 text-[11px] text-slate-700">
-                        <p id="scanFeedbackText" class="font-medium"></p>
-                        <ul id="scanTipsList" class="list-disc list-inside space-y-1 text-slate-600"></ul>
-                    </div>
+                    <p id="scanFeedbackText" class="text-xs font-bold text-slate-800"></p>
+                    <ul id="scanTipsList" class="list-disc list-inside space-y-1 text-[11px] text-slate-700"></ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Pro CV Order Modal -->
+    <!-- 2. Pro CV Design Service Modal -->
     <div id="atsModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative">
-            <button onclick="closeAtsModal()" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-box max-w-lg p-6 sm:p-8 space-y-4 relative">
+            <button onclick="closeAtsModal()" class="absolute top-5 left-5 w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200"><i class="fa-solid fa-xmark"></i></button>
             <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-file-shield text-amber-500"></i> طلب خدمة تصميم وتعديل CV احترافي (ATS)
+                <i class="fa-solid fa-file-shield text-amber-500"></i>
+                <span>طلب تصميم CV احترافي متوافق مع ATS (بكل اللغات)</span>
             </h3>
-            <p class="text-xs text-slate-500">هذه الخدمة حصرية لباقة Pro. أدخل بياناتك وسيتواصل معك خبير التوظيف لتصميم سيرتك بكل اللغات المطلوبة.</p>
+            <p class="text-xs text-slate-500">نصمم ونكتب لك سيرة ذاتية قياسية عالمية متوافقة 100% مع أنظمة الفرز الآلي وبأي لغة تختارها.</p>
             <div class="space-y-3 text-xs pt-2">
-                <input type="text" id="atsName" placeholder="الاسم الكامل..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5">
-                <input type="text" id="atsField" placeholder="المجال والتخصص (مثال: مهندس كهرباء)..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5">
-                <select id="atsLangSelect" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5">
-                    <option value="ar">اللغة العربية (Arabic)</option>
-                    <option value="en">اللغة الإنجليزية (English)</option>
-                    <option value="both">العربية والإنجليزية معا (Bilingual)</option>
-                </select>
-                <button onclick="submitAtsRequest()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-bold transition shadow">إرسال الطلب 🚀</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Redeem Code Modal -->
-    <div id="redeemModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 relative">
-            <button onclick="closeRedeemModal()" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-lg font-black text-slate-900 flex items-center">
-                <i class="fa-solid fa-key text-amber-500 ml-2"></i> تفعيل اشتراك 3 شهور
-            </h3>
-            <p class="text-xs text-slate-500">أدخل رقم الموبايل أو الإيميل الخاص بك، متبوعاً بكود التفعيل المرسل إليك.</p>
-            
-            <div class="space-y-3 pt-2">
                 <div>
-                    <label class="text-xs font-semibold text-slate-700 block mb-1">رقم الموبايل أو الإيميل:</label>
-                    <input type="text" id="userAccountInput" placeholder="010xxxxxxxx أو email@domain.com" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-600">
+                    <label class="font-bold text-slate-700 block mb-1">الاسم الكامل:</label>
+                    <input type="text" id="atsName" placeholder="أدخل اسمك الكامل..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5">
                 </div>
                 <div>
-                    <label class="text-xs font-semibold text-slate-700 block mb-1">كود التفعيل (Pro Code):</label>
-                    <input type="text" id="activationCodeInput" placeholder="CVJET-PRO-XXXX" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-sm uppercase font-mono font-bold text-center tracking-widest focus:outline-none focus:border-blue-600">
+                    <label class="font-bold text-slate-700 block mb-1">المسمى الوظيفي والتخصص:</label>
+                    <input type="text" id="atsField" placeholder="مثال: مهندس كهرباء قوى / تحكم آلي..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5">
                 </div>
-                <button onclick="redeemCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-2xl font-bold transition shadow">
-                    تحقق وتفعيل الحساب لمدة 3 شهور 🔓
+                <div>
+                    <label class="font-bold text-slate-700 block mb-1">لغة السيرة الذاتية المطلوبة:</label>
+                    <select id="atsLangSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5">
+                        <option value="both">العربية والإنجليزية معاً (Bilingual ATS)</option>
+                        <option value="en">اللغة الإنجليزية (English ATS)</option>
+                        <option value="de">اللغة الألمانية (German Europass/ATS)</option>
+                        <option value="fr">اللغة الفرنسية (French ATS)</option>
+                        <option value="ar">اللغة العربية (Arabic ATS)</option>
+                    </select>
+                </div>
+                <button onclick="submitAtsRequest()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 py-3 rounded-xl font-black transition shadow">
+                    إرسال طلب التصميم الآن 🚀
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Payment Modal -->
+    <!-- 3. Redeem Code Modal -->
+    <div id="redeemModal" class="modal-overlay hidden">
+        <div class="modal-box max-w-md p-6 sm:p-8 space-y-4 relative">
+            <button onclick="closeRedeemModal()" class="absolute top-5 left-5 w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-key text-emerald-600"></i>
+                <span>تفعيل اشتراك Pro لمدة 3 شهور</span>
+            </h3>
+            <p class="text-xs text-slate-500">أدخل رقم الموبايل أو الإيميل المسجل، متبوعاً بكود التفعيل السري لفتح جميع الوظائف والميزات.</p>
+            <div class="space-y-3 pt-2">
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">رقم الموبايل أو البريد الإلكتروني:</label>
+                    <input type="text" id="userAccountInput" placeholder="010xxxxxxxx أو email@domain.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">كود التفعيل (Pro Code):</label>
+                    <input type="text" id="activationCodeInput" placeholder="CVJET-PRO-XXXX" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm uppercase font-mono font-bold text-center tracking-widest">
+                </div>
+                <button onclick="redeemCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold transition shadow text-sm">
+                    تحقق وتفعيل الحساب فوراً 🔓
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Payment Modal ($8 / 3 Months) -->
     <div id="paymentModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative max-h-[90vh] overflow-y-auto">
-            <button onclick="closePaymentModal()" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-box max-w-lg p-6 sm:p-8 space-y-4 relative">
+            <button onclick="closePaymentModal()" class="absolute top-5 left-5 w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200"><i class="fa-solid fa-xmark"></i></button>
             <div class="text-center space-y-1">
                 <h3 class="text-xl font-black text-slate-900">طرق دفع اشتراك الـ 3 شهور ($8)</h3>
-                <p class="text-xs text-slate-500">بعد التحويل، أدخل بياناتك أدناه واضغط على زر "طلب كود التفعيل"</p>
+                <p class="text-xs text-slate-500">حول قيمة الاشتراك ثم أرسل رقم الإيصال لاستلام كود التفعيل الفوري</p>
             </div>
-
             <div class="space-y-3 text-xs">
-                <div class="bg-blue-50 border border-blue-200 p-3.5 rounded-2xl space-y-2">
-                    <h4 class="font-bold text-blue-900 flex items-center text-xs">
-                        <i class="fa-solid fa-earth-americas ml-2 text-blue-600"></i> الدفع داخل مصر 🇪🇬 (فودافون كاش وإنستاباي)
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl space-y-2.5">
+                    <h4 class="font-bold text-blue-950 flex items-center gap-2">
+                        <i class="fa-solid fa-mobile-screen-button text-blue-600"></i> الدفع داخل مصر 🇪🇬 (فودافون كاش وإنستاباي)
+                    </h4>
+                    <div class="flex justify-between items-center bg-white p-2.5 rounded-xl border border-blue-100">
+                        <div>
+                            <span class="text-slate-500 block text-[10px]">فودافون كاش:</span>
+                            <span class="font-mono font-bold text-sm text-slate-900">01020073082</span>
+                        </div>
+                        <button onclick="copyText('01020073082')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">نسخ</button>
+                    </div>
+                    <div class="flex justify-between items-center bg-white p-2.5 rounded-xl border border-blue-100">
+                        <div>
+                            <span class="text-slate-500 block text-[10px]">إنستاباي (InstaPay):</span>
+                            <span class="font-mono font-bold text-sm text-slate-900">ksaadaldien@instapay.com</span>
+                        </div>
+                        <button onclick="copyText('ksaadaldien@instapay.com')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">نسخ</button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-100 border border-slate-300 p-4 rounded-2xl space-y-2">
+                    <h4 class="font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-building-columns text-slate-700"></i> التحويل البنكي الدولي 🌍
                     </h4>
                     <div class="flex justify-between items-center bg-white p-2.5 rounded-xl border">
                         <div>
-                            <span class="text-slate-500 block text-[10px]">فودافون كاش:</span>
-                            <span class="font-mono font-bold text-xs text-slate-800">01020073082</span>
+                            <span class="text-slate-500 block text-[10px]">رقم الحساب البنكي:</span>
+                            <span class="font-mono font-bold text-sm text-slate-900">5359 5400 6544 0514</span>
                         </div>
-                        <button onclick="copyText('01020073082')" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold">نسخ</button>
-                    </div>
-                    <div class="flex justify-between items-center bg-white p-2.5 rounded-xl border">
-                        <div>
-                            <span class="text-slate-500 block text-[10px]">إنستاباي:</span>
-                            <span class="font-mono font-bold text-xs text-slate-800">ksaadaldien@instapay.com</span>
-                        </div>
-                        <button onclick="copyText('ksaadaldien@instapay.com')" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold">نسخ</button>
+                        <button onclick="copyText('5359540065440514')" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">نسخ</button>
                     </div>
                 </div>
 
                 <div class="bg-purple-50 border border-purple-200 p-4 rounded-2xl space-y-3">
-                    <h4 class="font-bold text-purple-900 text-xs">🎟️ اطلب كود التفعيل الخاص بك الآن:</h4>
-                    <div>
-                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">رقم الموبايل أو الإيميل المراد تفعيله:</label>
-                        <input type="text" id="requestCodeAccount" placeholder="أدخل رقمك أو إيميلك هنا..." class="w-full bg-white border rounded-2xl px-3 py-2.5 text-xs focus:outline-none focus:border-purple-600">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-semibold text-slate-700 block mb-1">رقم العملية أو تفاصيل التحويل (للتأكيد):</label>
-                        <input type="text" id="requestCodeReceipt" placeholder="أدخل رقم إيصال التحويل..." class="w-full bg-white border rounded-2xl px-3 py-2.5 text-xs focus:outline-none focus:border-purple-600">
-                    </div>
-                    <button onclick="submitRequestCodeButton()" class="w-full bg-purple-700 hover:bg-purple-600 text-white py-3 rounded-2xl font-bold transition shadow text-xs">
-                        ✨ طلب كود التفعيل برقم الموبايل أو الإيميل
+                    <h4 class="font-bold text-purple-950">🎟️ اطلب كود التفعيل الخاص بك الآن:</h4>
+                    <input type="text" id="requestCodeAccount" placeholder="رقم الموبايل أو الإيميل المراد تفعيله..." class="w-full bg-white border border-purple-200 rounded-xl px-3.5 py-2.5">
+                    <input type="text" id="requestCodeReceipt" placeholder="رقم عملية التحويل أو الإيصال..." class="w-full bg-white border border-purple-200 rounded-xl px-3.5 py-2.5">
+                    <button onclick="submitRequestCodeButton()" class="w-full bg-purple-700 hover:bg-purple-600 text-white py-3 rounded-xl font-bold transition shadow">
+                        ✨ إرسال طلب كود التفعيل
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Admin Password Prompt Modal -->
-    <div id="adminPasswordModal" class="modal-overlay z-50 hidden">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 relative text-center">
-            <div class="w-12 h-12 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center mx-auto text-lg font-bold">
-                <i class="fa-solid fa-lock"></i>
+    <!-- 5. Admin Password Modal -->
+    <div id="adminPasswordModal" class="modal-overlay hidden">
+        <div class="modal-box max-w-sm p-6 text-center space-y-4 relative">
+            <div class="w-12 h-12 bg-purple-100 text-purple-700 rounded-2xl flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-shield-halved"></i>
             </div>
             <h3 class="text-lg font-black text-slate-900">منطقة المالك والمدير</h3>
-            <p class="text-xs text-slate-500">أدخل كلمة سر الأدمن للوصول إلى لوحة التحكم المخفية.</p>
-            <input type="password" id="adminSecretInput" placeholder="كلمة المرور السرية..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-sm text-center font-mono focus:outline-none focus:border-purple-600">
-            <div class="flex gap-2 pt-2">
-                <button onclick="closeAdminPasswordModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-800 py-3 rounded-2xl font-bold text-xs">إلغاء</button>
-                <button onclick="verifyAdminPassword()" class="w-1/2 bg-purple-700 hover:bg-purple-600 text-white py-3 rounded-2xl font-bold text-xs">دخول ⚙️</button>
+            <p class="text-xs text-slate-500">أدخل كلمة المرور السرية للوصول إلى لوحة التحكم الكاملة.</p>
+            <input type="password" id="adminSecretInput" placeholder="كلمة المرور..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-center font-mono">
+            <div class="flex gap-2">
+                <button onclick="closeAdminPasswordModal()" class="w-1/2 bg-slate-200 text-slate-800 py-2.5 rounded-xl font-bold text-xs">إلغاء</button>
+                <button onclick="verifyAdminPassword()" class="w-1/2 bg-purple-700 text-white py-2.5 rounded-xl font-bold text-xs">دخول ⚙️</button>
             </div>
         </div>
     </div>
 
-    <!-- Admin Dashboard Modal -->
+    <!-- 6. Full Admin Dashboard Modal (With Company Logo Upload & Aggregator & Codes) -->
     <div id="adminModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-black text-slate-900 flex items-center">
-                    <i class="fa-solid fa-shield-halved ml-2 text-purple-700"></i> لوحة تحكم المالك (إدارة الوظائف وصور الشركات)
+        <div class="modal-box max-w-4xl p-6 sm:p-8 space-y-6 relative">
+            <div class="flex justify-between items-center border-b pb-4">
+                <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-gears text-purple-700"></i>
+                    <span>لوحة تحكم المالك (إدارة الوظائف وشعارات الشركات والأكواد)</span>
                 </h3>
-                <button onclick="closeAdmin()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeAdmin()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <div class="flex gap-2 border-b pb-2 text-xs font-bold">
-                <button onclick="switchAdminTab('jobs')" id="tabJobsBtn" class="bg-purple-700 text-white px-4 py-2 rounded-xl transition">إدارة الوظائف وصور الشركات 📋</button>
-                <button onclick="switchAdminTab('codes')" id="tabCodesBtn" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl transition">أكواد الـ 3 شهور 🔑</button>
+            <!-- Admin Tabs -->
+            <div class="flex flex-wrap gap-2 border-b pb-3 text-xs font-bold">
+                <button onclick="switchAdminTab('jobs')" id="tabJobsBtn" class="bg-purple-700 text-white px-4 py-2 rounded-xl transition">إدارة الوظائف وصورة الشركة 📋</button>
+                <button onclick="switchAdminTab('aggregator')" id="tabAggregatorBtn" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl transition">جلب تلقائي من الإنترنت ⚡</button>
+                <button onclick="switchAdminTab('codes')" id="tabCodesBtn" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl transition">توليد أكواد الـ 3 شهور 🔑</button>
             </div>
 
+            <!-- Tab 1: Add/Manage Jobs + Company Profile Logo -->
             <div id="adminJobsTab" class="space-y-4 text-xs">
-                <div class="bg-purple-50 p-4 rounded-3xl border border-purple-200 space-y-3">
-                    <span class="font-bold text-purple-900 block text-sm">إضافة وظيفة يدوياً مع صورة بروفايل الشركة:</span>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <input type="text" id="newJobTitle" placeholder="المسمى الوظيفي..." class="bg-white border rounded-2xl px-3 py-2.5">
-                        <input type="text" id="newJobCompany" placeholder="اسم الشركة المعلنة..." class="bg-white border rounded-2xl px-3 py-2.5">
-                        <input type="text" id="newJobLocation" placeholder="المكان والدولة..." class="bg-white border rounded-2xl px-3 py-2.5">
-                        <input type="text" id="newJobSalary" placeholder="الراتب..." class="bg-white border rounded-2xl px-3 py-2.5">
+                <div class="bg-purple-50 p-4 sm:p-5 rounded-2xl border border-purple-200 space-y-3">
+                    <span class="font-bold text-purple-950 block text-sm">إضافة وظيفة جديدة مع صورة بروفايل الشركة المعلنة:</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input type="text" id="newJobTitle" placeholder="المسمى الوظيفي (مثال: HV Substation Engineer)..." class="bg-white border rounded-xl px-3 py-2.5">
+                        <input type="text" id="newJobCompany" placeholder="اسم الشركة المعلنة..." class="bg-white border rounded-xl px-3 py-2.5">
+                        <input type="text" id="newJobLocation" placeholder="المدينة والدولة (مثال: Munich, ألمانيا 🇩🇪)..." class="bg-white border rounded-xl px-3 py-2.5">
+                        <input type="text" id="newJobSalary" placeholder="الراتب (مثال: €75,000 / year)..." class="bg-white border rounded-xl px-3 py-2.5">
                     </div>
-                    <div>
-                        <label class="font-semibold text-slate-700 block mb-1">صورة بروفايل الشركة (رابط صورة Logo):</label>
-                        <input type="text" id="newJobLogo" placeholder="https://example.com/logo.png" class="w-full bg-white border rounded-2xl px-3 py-2.5">
+
+                    <!-- Company Logo Upload or URL -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-purple-100">
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">رفع صورة بروفايل الشركة من جهازك:</label>
+                            <input type="file" id="newJobLogoFile" accept="image/*" onchange="handleLogoFileUpload(event)" class="w-full text-xs text-slate-500">
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">أو رابط مباشر لشعار الشركة (Logo URL):</label>
+                            <input type="text" id="newJobLogoUrl" placeholder="https://..." class="w-full bg-slate-50 border rounded-lg px-3 py-1.5">
+                        </div>
                     </div>
-                    <select id="newJobCountryKey" class="w-full bg-white border rounded-2xl px-3 py-2.5">
-                        <option value="egypt">مصر (Egypt)</option>
-                        <option value="gcc">الخليج (GCC)</option>
-                        <option value="europe">أوروبا (Europe)</option>
-                        <option value="usa">أمريكا (USA)</option>
-                        <option value="germany">ألمانيا (Germany)</option>
-                        <option value="saudi">السعودية (Saudi Arabia)</option>
-                        <option value="uae">الإمارات (UAE)</option>
-                        <option value="qatar">قطر (Qatar)</option>
-                    </select>
-                    <textarea id="newJobDesc" placeholder="تفاصيل الوظيفة..." class="w-full bg-white border rounded-2xl px-3 py-2.5" rows="2"></textarea>
-                    <label class="flex items-center gap-2 cursor-pointer pt-1">
-                        <input type="checkbox" id="newJobVisa" class="w-4 h-4 text-purple-600 rounded">
-                        <span class="font-bold text-purple-900">تدعم تأشيرة العمل (Visa Sponsorship)</span>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <select id="newJobCountryKey" class="bg-white border rounded-xl px-3 py-2.5">
+                            <option value="germany">ألمانيا (Germany)</option>
+                            <option value="saudi">السعودية (Saudi)</option>
+                            <option value="uae">الإمارات (UAE)</option>
+                            <option value="qatar">قطر (Qatar)</option>
+                            <option value="netherlands">هولندا (Netherlands)</option>
+                            <option value="france">فرنسا (France)</option>
+                            <option value="uk">بريطانيا (UK)</option>
+                            <option value="usa">أمريكا (USA)</option>
+                            <option value="canada">كندا (Canada)</option>
+                            <option value="egypt">مصر (Egypt)</option>
+                        </select>
+                        <select id="newJobWorkMode" class="bg-white border rounded-xl px-3 py-2.5">
+                            <option value="onsite">حضوري (On-site)</option>
+                            <option value="remote">عن بُعد (Remote)</option>
+                        </select>
+                        <select id="newJobLevel" class="bg-white border rounded-xl px-3 py-2.5">
+                            <option value="senior">خبير (Senior)</option>
+                            <option value="mid">متوسط (Mid-Level)</option>
+                        </select>
+                    </div>
+
+                    <textarea id="newJobDesc" placeholder="وصف وتفاصيل الوظيفة..." class="w-full bg-white border rounded-xl px-3 py-2" rows="2"></textarea>
+                    
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="newJobVisa" checked class="w-4 h-4 text-purple-600 rounded">
+                        <span class="font-bold text-purple-950">✈️ تدعم تأشيرة العمل والكفالة (Visa Sponsorship)</span>
                     </label>
-                    <button onclick="addNewJob()" class="w-full bg-purple-700 text-white py-3 rounded-2xl font-bold hover:bg-purple-600 shadow">✨ نشر الوظيفة وصورة الشركة فوراً</button>
+
+                    <button onclick="addNewJob()" class="w-full bg-purple-700 hover:bg-purple-600 text-white py-3 rounded-xl font-bold shadow">
+                        ✨ نشر الوظيفة مع شعار الشركة فوراً
+                    </button>
                 </div>
 
-                <div class="border rounded-3xl overflow-hidden">
-                    <div class="table-wrap"><table class="w-full text-right border-collapse">
+                <div class="border rounded-2xl overflow-x-auto">
+                    <table class="w-full text-right border-collapse min-w-[500px]">
                         <thead class="bg-slate-100 text-slate-700 font-bold border-b">
                             <tr>
-                                <th class="p-3">شعار الشركة والمسمى</th>
-                                <th class="p-3">الشركة والدولة</th>
-                                <th class="p-3 text-center">الإجراء</th>
+                                <th class="p-3">الشعار والمسمى الوظيفي</th>
+                                <th class="p-3">الشركة والموقع</th>
+                                <th class="p-3 text-center">حذف</th>
                             </tr>
                         </thead>
                         <tbody id="adminJobsTableBody"></tbody>
-                    </table></div>
+                    </table>
                 </div>
             </div>
 
-            <div id="adminCodesTab" class="space-y-4 text-xs hidden">
-                <div class="bg-purple-50 p-4 rounded-3xl border border-purple-200 space-y-3">
-                    <span class="font-bold text-purple-900 block text-sm">إنشاء كود مخصص لعميل جديد (3 شهور بالضبط):</span>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <input type="text" id="adminClientAccount" placeholder="رقم الموبايل أو الإيميل للعميل" class="bg-white border rounded-2xl px-3 py-2.5">
-                        <input type="text" id="adminCustomCode" placeholder="الكود (مثال: KHALED-99)" class="bg-white border rounded-2xl px-3 py-2.5">
+            <!-- Tab 2: Web Aggregator -->
+            <div id="adminAggregatorTab" class="space-y-4 text-xs hidden">
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-200 space-y-3">
+                    <span class="font-bold text-blue-950 block text-sm">البحث وجلب الوظائف تلقائياً من المنصات العالمية:</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <input type="text" id="aggregatorQuery" placeholder="مسمى الوظيفة (مثال: Electrical Engineer)..." class="bg-white border rounded-xl px-3 py-2.5">
+                        <select id="aggregatorPlatform" class="bg-white border rounded-xl px-3 py-2.5">
+                            <option value="LinkedIn">LinkedIn Jobs</option>
+                            <option value="Indeed">Indeed Global</option>
+                            <option value="Glassdoor">Glassdoor</option>
+                        </select>
+                        <button onclick="fetchJobsFromWeb()" class="bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl font-bold shadow">🔍 بحث وجلب فوري</button>
                     </div>
-                    <button onclick="createClientCode()" class="w-full bg-purple-700 text-white py-3 rounded-2xl font-bold hover:bg-purple-600 shadow">✨ توليد وربط الكود بـ 3 شهور</button>
                 </div>
-
-                <div class="border rounded-3xl overflow-hidden">
-                    <div class="table-wrap"><table class="w-full text-right border-collapse">
+                <div class="border rounded-2xl overflow-x-auto">
+                    <table class="w-full text-right border-collapse min-w-[500px]">
                         <thead class="bg-slate-100 text-slate-700 font-bold border-b">
                             <tr>
-                                <th class="p-3">الإيميل / الموبايل</th>
-                                <th class="p-3">الكود السري</th>
-                                <th class="p-3 text-center">الإجراءات</th>
+                                <th class="p-3">الوظيفة والمنصة</th>
+                                <th class="p-3">الشركة والدولة</th>
+                                <th class="p-3 text-center">نشر للموقع</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminAggregatorTableBody">
+                            <tr><td colspan="3" class="p-4 text-center text-slate-400">اكتب المسمى الوظيفي بالأعلى لجلب الوظائف...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 3: Subscription Codes -->
+            <div id="adminCodesTab" class="space-y-4 text-xs hidden">
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 space-y-3">
+                    <span class="font-bold text-emerald-950 block text-sm">توليد كود اشتراك Pro لعميل جديد (صالح لمدة 3 شهور):</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input type="text" id="adminClientAccount" placeholder="رقم موبايل أو إيميل العميل..." class="bg-white border rounded-xl px-3 py-2.5">
+                        <input type="text" id="adminCustomCode" placeholder="الكود السري (مثال: CVJET-PRO-2026)..." class="bg-white border rounded-xl px-3 py-2.5 uppercase font-mono">
+                    </div>
+                    <button onclick="createClientCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold shadow">
+                        ✨ تفعيل وربط الكود بـ 3 شهور
+                    </button>
+                </div>
+                <div class="border rounded-2xl overflow-x-auto">
+                    <table class="w-full text-right border-collapse min-w-[500px]">
+                        <thead class="bg-slate-100 text-slate-700 font-bold border-b">
+                            <tr>
+                                <th class="p-3">حساب العميل</th>
+                                <th class="p-3">الكود الفعال</th>
+                                <th class="p-3 text-center">إجراء</th>
                             </tr>
                         </thead>
                         <tbody id="adminCodesTableBody"></tbody>
-                    </table></div>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript Application Logic -->
+    <!-- JavaScript Application Logic (Clean DOM Creation - No Template Literal Corruption) -->
     <script>
-        let currentLang = 'ar';
-        let isPro = false;
-        let currentUserAccount = "";
-        let threeMonthMs = 90 * 24 * 60 * 60 * 1000; 
-        const ADMIN_SECRET_PASSWORD = "admin123";
+        var currentLang = 'ar';
+        var isPro = false;
+        var currentUserAccount = '';
+        var uploadedLogoBase64 = '';
+        var threeMonthMs = 90 * 24 * 60 * 60 * 1000;
+        var ADMIN_SECRET_PASSWORD = 'admin123';
 
-        let activeSubscriptions = [
-            { account: "01020073082", code: "CVJET-PRO-KHALED", expiry: Date.now() + threeMonthMs },
-            { account: "test@cvjet.com", code: "TEST-PRO-90", expiry: Date.now() + threeMonthMs }
+        var activeSubscriptions = [
+            { account: '01020073082', code: 'CVJET-PRO-KHALED', expiry: Date.now() + threeMonthMs },
+            { account: 'test@cvjet.com', code: 'TEST-PRO-90', expiry: Date.now() + threeMonthMs }
         ];
 
-        let defaultJobs = [
-            { title: "Electrical Site Engineer (Haya Karima)", company: "Orascom / Haya Karima", logo: "https://images.unsplash.com/photo-1541888946425-d0fbb18f249d?w=100&h=100&fit=crop", location: "Qena, مصر 🇪🇬", countryKey: "egypt", workMode: "onsite", level: "mid", salary: "18,000 - 25,000 EGP", visa: false, desc: "Supervising medium and high voltage cable extensions, substation infrastructure, transformers, and local generators." },
-            { title: "Senior Electrical Power Engineer", company: "Siemens Energy", logo: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=100&h=100&fit=crop", location: "Munich, ألمانيا 🇩🇪", countryKey: "germany", workMode: "onsite", level: "senior", salary: "€75,000 / year", visa: true, desc: "High voltage substation maintenance and grid design with full relocation & visa sponsorship." },
-            { title: "Solar PV & BESS Site Engineer", company: "NEOM Green Energy", logo: "https://images.unsplash.com/photo-1509391365360-e835f377e8be?w=100&h=100&fit=crop", location: "Tabuk, السعودية 🇸🇦", countryKey: "saudi", workMode: "onsite", level: "senior", salary: "$4,500 / month", visa: true, desc: "Supervising solar photovoltaic and battery energy storage systems installation." },
-            { title: "SCADA & PLC Automation Specialist", company: "Schneider Electric", logo: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&h=100&fit=crop", location: "Dubai, الإمارات 🇦🇪", countryKey: "uae", workMode: "onsite", level: "mid", salary: "AED 18,000 / month", visa: true, desc: "Programming and commissioning SCADA and PLC control panels for mega industrial projects." }
+        // 8 Global Jobs (Orascom Qena removed as requested, First 5 visible for free, all with Visa support)
+        var defaultJobs = [
+            {
+                title: 'Electrical Power & Substation Engineer',
+                company: 'Siemens Energy',
+                logo: 'https://ui-avatars.com/api/?name=Siemens+Energy&background=0284c7&color=fff&bold=true',
+                location: 'Munich, ألمانيا 🇩🇪',
+                countryKey: 'germany',
+                regionGroup: 'europe',
+                workMode: 'onsite',
+                level: 'senior',
+                salary: '€78,000 / year',
+                visa: true,
+                desc: 'Supervising HV/MV substations, grid integration, protection relays, and power transformers with full EU Blue Card visa sponsorship.'
+            },
+            {
+                title: 'Utility-Scale Solar PV & BESS Engineer',
+                company: 'NEOM Green Energy',
+                logo: 'https://ui-avatars.com/api/?name=NEOM&background=059669&color=fff&bold=true',
+                location: 'Tabuk, السعودية 🇸🇦',
+                countryKey: 'saudi',
+                regionGroup: 'gcc',
+                workMode: 'onsite',
+                level: 'senior',
+                salary: '$5,200 / month',
+                visa: true,
+                desc: 'Leading installation, testing, and commissioning of gigawatt-scale Solar PV plants and Battery Energy Storage Systems (BESS).'
+            },
+            {
+                title: 'SCADA & PLC Automation Specialist',
+                company: 'Schneider Electric',
+                logo: 'https://ui-avatars.com/api/?name=Schneider&background=16a34a&color=fff&bold=true',
+                location: 'Dubai, الإمارات 🇦🇪',
+                countryKey: 'uae',
+                regionGroup: 'gcc',
+                workMode: 'onsite',
+                level: 'mid',
+                salary: 'AED 20,000 / month',
+                visa: true,
+                desc: 'Programming and commissioning PLC/SCADA industrial control panels, RMUs, and smart power distribution networks.'
+            },
+            {
+                title: 'Industrial Electrical Maintenance Lead',
+                company: 'ABB Automation',
+                logo: 'https://ui-avatars.com/api/?name=ABB&background=dc2626&color=fff&bold=true',
+                location: 'Doha, قطر 🇶🇦',
+                countryKey: 'qatar',
+                regionGroup: 'gcc',
+                workMode: 'onsite',
+                level: 'senior',
+                salary: 'QAR 24,000 / month',
+                visa: true,
+                desc: 'Overseeing heavy industrial electrical maintenance, high-power motors, busbars, and switchgear reliability.'
+            },
+            {
+                title: 'Power Distribution & Grid Engineer',
+                company: 'Tesla Gigafactory',
+                logo: 'https://ui-avatars.com/api/?name=Tesla&background=1e293b&color=fff&bold=true',
+                location: 'Austin, أمريكا 🇺🇸',
+                countryKey: 'usa',
+                regionGroup: 'usa',
+                workMode: 'onsite',
+                level: 'senior',
+                salary: '$115,000 / year',
+                visa: true,
+                desc: 'Designing and executing medium and high voltage power distribution systems and BESS grid integration.'
+            },
+            {
+                title: 'Renewable Energy Project Consultant',
+                company: 'TotalEnergies',
+                logo: 'https://ui-avatars.com/api/?name=Total+Energies&background=2563eb&color=fff&bold=true',
+                location: 'Paris, فرنسا 🇫🇷',
+                countryKey: 'france',
+                regionGroup: 'europe',
+                workMode: 'remote',
+                level: 'senior',
+                salary: '€92,000 / year',
+                visa: true,
+                desc: 'Technical procurement, PVsyst & ETAP simulation review, and engineering management for utility solar projects.'
+            },
+            {
+                title: 'Senior Automation & Controls Architect',
+                company: 'ASML',
+                logo: 'https://ui-avatars.com/api/?name=ASML&background=4f46e5&color=fff&bold=true',
+                location: 'Eindhoven, هولندا 🇳🇱',
+                countryKey: 'netherlands',
+                regionGroup: 'europe',
+                workMode: 'onsite',
+                level: 'senior',
+                salary: '€96,000 / year',
+                visa: true,
+                desc: 'Developing precision industrial automation systems with full Dutch Highly Skilled Migrant visa sponsorship.'
+            },
+            {
+                title: 'Smart Grid & Energy Systems Engineer',
+                company: 'National Grid UK',
+                logo: 'https://ui-avatars.com/api/?name=National+Grid&background=0d9488&color=fff&bold=true',
+                location: 'London, بريطانيا 🇬🇧',
+                countryKey: 'uk',
+                regionGroup: 'europe',
+                workMode: 'remote',
+                level: 'mid',
+                salary: '£85,000 / year',
+                visa: true,
+                desc: 'Grid stability analysis, power quality monitoring, and substation protection coordination.'
+            }
         ];
 
-        let currentJobs = [...defaultJobs];
+        var currentJobs = defaultJobs.slice();
+        var fetchedWebJobsCache = [];
 
-        function toggleMobileMenu() {
-            let menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
+        function toggleMobileDrawer() {
+            var d = document.getElementById('mobileDrawer');
+            d.classList.toggle('hidden');
         }
 
-        function toggleLanguage() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            const root = document.getElementById('htmlRoot');
-            root.lang = currentLang;
-            root.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('langBtn').innerText = currentLang === 'ar' ? "🌐 English" : "🌐 عربي";
+        function handleLogoFileUpload(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedLogoBase64 = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderJobs() {
+            var container = document.getElementById('jobsContainer');
+            container.innerHTML = '';
+
+            var subHeader = document.getElementById('jobs-header-sub');
+            if (currentLang === 'ar') {
+                subHeader.textContent = '● إجمالي ' + currentJobs.length + ' وظائف (5 مفتوحة مجاناً)';
+            } else {
+                subHeader.textContent = '● Showing ' + currentJobs.length + ' Jobs (5 Free Unlocked)';
+            }
+
+            for (var i = 0; i < currentJobs.length; i++) {
+                var job = currentJobs[i];
+                var isLocked = !isPro && i >= 5;
+
+                var card = document.createElement('div');
+                card.className = 'bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-200 hover:border-blue-400 transition relative overflow-hidden flex flex-col justify-between gap-4';
+
+                var contentWrap = document.createElement('div');
+                contentWrap.className = isLocked ? 'blur-job space-y-3' : 'space-y-3';
+
+                // Top Row: Logo + Title + Badges
+                var topRow = document.createElement('div');
+                topRow.className = 'flex items-start gap-3.5 sm:gap-4';
+
+                var logoImg = document.createElement('img');
+                logoImg.src = job.logo || 'https://ui-avatars.com/api/?name=Company&background=2563eb&color=fff';
+                logoImg.alt = job.company;
+                logoImg.className = 'w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border border-slate-200 shadow-sm shrink-0 bg-slate-100';
+
+                var titleBox = document.createElement('div');
+                titleBox.className = 'flex-grow min-w-0';
+
+                var badgesWrap = document.createElement('div');
+                badgesWrap.className = 'flex flex-wrap items-center gap-1.5 mb-1.5';
+
+                var compBadge = document.createElement('span');
+                compBadge.className = 'text-[11px] bg-blue-50 text-blue-700 font-bold px-2.5 py-0.5 rounded-lg';
+                compBadge.textContent = job.company;
+                badgesWrap.appendChild(compBadge);
+
+                if (job.visa) {
+                    var visaBadge = document.createElement('span');
+                    visaBadge.className = 'text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-lg';
+                    visaBadge.innerHTML = '<i class="fa-solid fa-plane-up ml-1"></i> Visa Sponsored';
+                    badgesWrap.appendChild(visaBadge);
+                }
+
+                var titleEl = document.createElement('h4');
+                titleEl.className = 'text-base sm:text-lg font-black text-slate-900 leading-snug';
+                titleEl.textContent = job.title;
+
+                var metaEl = document.createElement('p');
+                metaEl.className = 'text-xs text-slate-500 mt-1 font-semibold';
+                metaEl.innerHTML = '<i class="fa-solid fa-location-dot text-red-500 ml-1"></i> ' + job.location + ' &nbsp;|&nbsp; <span class="text-emerald-700 font-bold">' + (job.salary || 'Competitive') + '</span>';
+
+                titleBox.appendChild(badgesWrap);
+                titleBox.appendChild(titleEl);
+                titleBox.appendChild(metaEl);
+
+                topRow.appendChild(logoImg);
+                topRow.appendChild(titleBox);
+
+                var descEl = document.createElement('p');
+                descEl.className = 'text-xs text-slate-600 leading-relaxed pt-1';
+                descEl.textContent = job.desc;
+
+                var footerRow = document.createElement('div');
+                footerRow.className = 'flex items-center justify-between pt-3 border-t border-slate-100 text-xs';
+
+                var modeTag = document.createElement('span');
+                modeTag.className = 'bg-slate-100 text-slate-700 px-3 py-1 rounded-xl font-bold text-[11px]';
+                modeTag.textContent = job.workMode === 'remote' ? '💻 عن بُعد (Remote)' : '🏢 دوام كامل (On-site)';
+
+                var applyBtn = document.createElement('button');
+                applyBtn.className = 'bg-slate-900 hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-xs transition';
+                applyBtn.textContent = currentLang === 'ar' ? 'التفاصيل والتقديم ←' : 'Apply Now →';
+                applyBtn.onclick = function() {
+                    alert(currentLang === 'ar' ? 'تم فتح نموذج التقديم المباشر للشركة!' : 'Direct application portal opened!');
+                };
+
+                footerRow.appendChild(modeTag);
+                footerRow.appendChild(applyBtn);
+
+                contentWrap.appendChild(topRow);
+                contentWrap.appendChild(descEl);
+                contentWrap.appendChild(footerRow);
+                card.appendChild(contentWrap);
+
+                if (isLocked) {
+                    var overlay = document.createElement('div');
+                    overlay.className = 'absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center text-white p-5 text-center space-y-3';
+                    overlay.innerHTML = '<div class="w-11 h-11 rounded-2xl bg-amber-400/20 text-amber-400 flex items-center justify-center text-xl"><i class="fa-solid fa-lock"></i></div>' +
+                        '<p class="text-xs sm:text-sm font-bold max-w-xs">' + (currentLang === 'ar' ? 'هذه الوظيفة الدولية تتطلب اشتراك Pro صالح (8$ لمدة 3 شهور)' : 'This international job requires an active 3-Month Pro subscription') + '</p>' +
+                        '<div class="flex gap-2">' +
+                        '<button onclick="openRedeemModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 px-4 py-2 rounded-xl text-xs font-black shadow">أدخل كود التفعيل 🔑</button>' +
+                        '<button onclick="openPaymentModal()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-2 rounded-xl text-xs font-bold">اشترك الآن</button>' +
+                        '</div>';
+                    card.appendChild(overlay);
+                }
+
+                container.appendChild(card);
+            }
+
+            renderAdminJobsTable();
+            renderAdminCodesTable();
+        }
+
+        function filterJobs() {
+            var q = document.getElementById('searchInput').value.toLowerCase().trim();
+            var c = document.getElementById('countrySelect').value;
+            var m = document.getElementById('workModeSelect').value;
+            var l = document.getElementById('careerLevelSelect').value;
+            var v = document.getElementById('visaFilter').checked;
+
+            currentJobs = defaultJobs.filter(function(job) {
+                var matchQ = !q || job.title.toLowerCase().indexOf(q) !== -1 || job.company.toLowerCase().indexOf(q) !== -1 || job.location.toLowerCase().indexOf(q) !== -1 || job.desc.toLowerCase().indexOf(q) !== -1;
+                var matchC = (c === 'all') || (job.countryKey === c) || (job.regionGroup === c);
+                var matchM = (m === 'all') || (job.workMode === m);
+                var matchL = (l === 'all') || (job.level === l);
+                var matchV = !v || job.visa === true;
+                return matchQ && matchC && matchM && matchL && matchV;
+            });
+
             renderJobs();
         }
 
-        function quickFilterCountry(countryKey) {
-            document.getElementById('countrySelect').value = countryKey;
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('countrySelect').value = 'all';
+            document.getElementById('workModeSelect').value = 'all';
+            document.getElementById('careerLevelSelect').value = 'all';
+            document.getElementById('visaFilter').checked = false;
             filterJobs();
-            document.getElementById('jobsContainer').scrollIntoView({behavior:'smooth'});
+        }
+
+        function quickFilterCountry(key) {
+            var select = document.getElementById('countrySelect');
+            var optionExists = false;
+            for (var i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === key) { optionExists = true; break; }
+            }
+            if (optionExists) {
+                select.value = key;
+                document.getElementById('searchInput').value = '';
+            } else {
+                select.value = 'all';
+                document.getElementById('searchInput').value = key;
+            }
+            filterJobs();
+            document.getElementById('jobsSection').scrollIntoView({ behavior: 'smooth' });
         }
 
         function quickFilterMode(mode) {
             document.getElementById('workModeSelect').value = mode;
             filterJobs();
-            document.getElementById('jobsContainer').scrollIntoView({behavior:'smooth'});
+            document.getElementById('jobsSection').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function filterJobs() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const country = document.getElementById('countrySelect').value;
-            const workMode = document.getElementById('workModeSelect').value;
-            const careerLevel = document.getElementById('careerLevelSelect').value;
-            const visaChecked = document.getElementById('visaFilter').checked;
+        function quickFilterVisa() {
+            document.getElementById('visaFilter').checked = true;
+            filterJobs();
+            document.getElementById('jobsSection').scrollIntoView({ behavior: 'smooth' });
+        }
 
-            currentJobs = defaultJobs.filter(job => {
-                let matchTitle = job.title.toLowerCase().includes(query) || job.company.toLowerCase().includes(query) || job.location.toLowerCase().includes(query);
-                let matchCountry = country === 'all' || job.countryKey === country;
-                let matchMode = workMode === 'all' || job.workMode === workMode;
-                let matchLevel = careerLevel === 'all' || job.level === careerLevel;
-                let matchVisa = !visaChecked || job.visa === true;
-                return matchTitle && matchCountry && matchMode && matchLevel && matchVisa;
-            });
+        function searchByCompany(compName) {
+            document.getElementById('searchInput').value = compName;
+            filterJobs();
+            document.getElementById('jobsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function toggleLanguage() {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            var root = document.getElementById('htmlRoot');
+            root.lang = currentLang;
+            root.dir = (currentLang === 'ar') ? 'rtl' : 'ltr';
+            document.getElementById('langBtn').textContent = (currentLang === 'ar') ? '🌐 EN' : '🌐 عربي';
+
+            if (currentLang === 'en') {
+                document.getElementById('hdr-sub').textContent = '195 Countries | Global Job & ATS Matching Suite';
+                document.getElementById('hero-title').innerHTML = 'Upload Your CV & Find The <span class="text-emerald-400">Best Global Jobs</span>';
+                document.getElementById('hero-desc').textContent = 'We scan your resume, extract your engineering & technical skills, and match you with visa-sponsored jobs across 195 countries.';
+                document.getElementById('ats-title').textContent = 'Professional ATS CV Writing';
+                document.getElementById('ats-desc').textContent = 'We craft 100% ATS-compliant resumes in all languages tailored for global & GCC employers.';
+                document.getElementById('ats-btn-txt').textContent = 'Order Your ATS CV Now';
+                document.getElementById('jobs-header-title').textContent = 'Recently Added Global Jobs';
+            } else {
+                document.getElementById('hdr-sub').textContent = 'منصة التوظيف الدولي وفحص الـ ATS الشاملة';
+                document.getElementById('hero-title').innerHTML = 'ارفع سيرتك الذاتية ونجد لك <span class="text-emerald-400">الوظائف الأنسب</span>';
+                document.getElementById('hero-desc').textContent = 'نقرأ سيرتك الذاتية ونستخرج خبراتك ومهاراتك وتخصصك، ثم نطابقها مع الوظائف المنشورة في 195 دولة مع دعم تأشيرة العمل ونعرض لك نسبة التوافق فوراً.';
+                document.getElementById('ats-title').textContent = 'خدمة تصميم CV احترافي';
+                document.getElementById('ats-desc').textContent = 'نصمم ونكتب لك سيرة ذاتية احترافية مطابقة لأنظمة الفرز الآلي (ATS)، متاحة بكل اللغات لتناسب الشركات العالمية والخليجية.';
+                document.getElementById('ats-btn-txt').textContent = 'اطلب سيرتك الذاتية الآن';
+                document.getElementById('jobs-header-title').textContent = 'وظائف أُضيفت حديثاً';
+            }
             renderJobs();
         }
 
-        function renderJobs() {
-            const container = document.getElementById('jobsContainer');
-            container.innerHTML = '';
-            document.getElementById('jobs-header-sub').innerText = `● تم العثور على ${currentJobs.length} وظيفة حقيقية متاحة`;
-
-            currentJobs.forEach((job, index) => {
-                let isBlurred = !isPro && index >= 2;
-                let card = document.createElement('div');
-                card.className = `bg-white p-5 rounded-3xl shadow-sm border border-slate-200 relative ${isBlurred ? 'overflow-hidden' : ''}`;
-                
-                let logoImg = job.logo ? `<img src="${job.logo}" class="w-12 h-12 rounded-2xl object-cover border shadow-sm">` : `<div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-building"></i></div>`;
-
-                card.innerHTML = `
-                    <div class="flex items-start gap-4 ${isBlurred ? 'blur-job' : ''}">
-                        <div>${logoImg}</div>
-                        <div class="flex-grow">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <span class="text-xs bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-xl">${job.company}</span>
-                                    <h4 class="text-base font-bold text-slate-900 mt-2">${job.title}</h4>
-                                    <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot ml-1 text-red-500"></i> ${job.location} | ${job.salary || 'Competitive'}</p>
-                                    <p class="text-xs text-slate-600 mt-3">${job.desc}</p>
-                                </div>
-                                <div>${job.visa ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full"><i class="fa-solid fa-plane"></i> Visa</span>' : ''}</div>
-                            </div>
-                        </div>
-                    </div>
-                    ${isBlurred ? `
-                        <div class="absolute inset-0 bg-slate-900/75 backdrop-blur-sm flex flex-col items-center justify-center text-white p-4 text-center space-y-2.5">
-                            <i class="fa-solid fa-lock text-amber-400 text-2xl"></i>
-                            <p class="text-xs font-bold">هذه الوظيفة تتطلب اشتراك Pro صالح (3 شهور)</p>
-                            <button onclick="openRedeemModal()" class="bg-amber-400 text-slate-950 px-4 py-2 rounded-2xl text-xs font-black shadow">أدخل كود التفعيل 🔑</button>
-                        </div>
-                    ` : ''}
-                `;
-                container.appendChild(card);
-            });
-            renderAdminJobsTable();
-            renderAdminCodesTable();
-        }
-
-        function copyText(text) {
-            navigator.clipboard.writeText(text);
-            alert('✅ تم النسخ بنجاح: ' + text);
-        }
-
+        // Modals Controls
         function openAtsScannerModal() { document.getElementById('atsScannerModal').classList.remove('hidden'); }
-        function closeAtsScannerModal() { document.getElementById('atsScannerModal').classList.add('hidden'); document.getElementById('scanResultsArea').classList.add('hidden'); }
-        
-        function openAtsModal() {
-            if (!isPro) {
-                alert('⚠️ هذه الخدمة حصرية للمشتركين (Pro). يرجى تفعيل كود الاشتراك أولاً.');
-                openRedeemModal();
-                return;
-            }
-            document.getElementById('atsModal').classList.remove('hidden');
-        }
-        function closeAtsModal() { document.getElementById('atsModal').classList.add('hidden'); }
-        function submitAtsRequest() {
-            let name = document.getElementById('atsName').value.trim();
-            let field = document.getElementById('atsField').value.trim();
-            if(!name || !field) { alert('يرجى إكمال البيانات المطلوبة.'); return; }
-            alert('✨ تم إرسال طلب تصميم سيرتك الذاتية المتوافقة مع ATS بنجاح وسيتواصل معك الفريق قريباً!');
-            closeAtsModal();
+        function closeAtsScannerModal() {
+            document.getElementById('atsScannerModal').classList.add('hidden');
+            document.getElementById('scanResultsArea').classList.add('hidden');
         }
 
         function runAtsScan() {
-            let title = document.getElementById('scanJobTitle').value.trim();
-            if (!title) { alert('يرجى إدخال المسمى الوظيفي المستهدف لفحص المطابقة بدقة.'); return; }
-            let resultsArea = document.getElementById('scanResultsArea');
-            let scoreBadge = document.getElementById('scanScoreBadge');
-            let feedbackText = document.getElementById('scanFeedbackText');
-            let tipsList = document.getElementById('scanTipsList');
+            var title = document.getElementById('scanJobTitle').value.trim();
+            if (!title) { alert('يرجى كتابة المسمى الوظيفي المستهدف أولاً.'); return; }
+            var area = document.getElementById('scanResultsArea');
+            var badge = document.getElementById('scanScoreBadge');
+            var fb = document.getElementById('scanFeedbackText');
+            var tips = document.getElementById('scanTipsList');
 
-            resultsArea.classList.remove('hidden');
-            scoreBadge.innerText = "جاري الفحص...";
-            setTimeout(() => {
-                let randomScore = Math.floor(Math.random() * (95 - 75 + 1)) + 75;
-                scoreBadge.innerText = randomScore + "%";
-                feedbackText.innerText = "ممتاز! سيرتك الذاتية متوافقة مع أنظمة الفرز الآلي للوظيفة المستهدفة.";
-                tipsList.innerHTML = `<li>✅ الكلمات المفتاحية الأساسية متواجدة بنسبة عالية.</li><li>💡 نصيحة: تأكد من وضوح التنسيق وخلوه من الجداول المعقدة.</li>`;
-            }, 1000);
+            area.classList.remove('hidden');
+            badge.textContent = 'جاري التحليل...';
+            setTimeout(function() {
+                var score = Math.floor(Math.random() * (96 - 78 + 1)) + 78;
+                badge.textContent = score + '%';
+                fb.textContent = 'توافق ممتاز مع معايير الفرز الآلي (ATS) للمسمى الوظيفي: ' + title;
+                tips.innerHTML = '<li>تم العثور على الكلمات المفتاحية الهندسية والتقنية الأساسية.</li><li>هيكل الملف واضح وقابل للقراءة الآلية بدون جداول معقدة.</li>';
+            }, 900);
+        }
+
+        function openAtsModal() { document.getElementById('atsModal').classList.remove('hidden'); }
+        function closeAtsModal() { document.getElementById('atsModal').classList.add('hidden'); }
+        function submitAtsRequest() {
+            var n = document.getElementById('atsName').value.trim();
+            var f = document.getElementById('atsField').value.trim();
+            if (!n || !f) { alert('يرجى إدخال الاسم والتخصص المطلوب.'); return; }
+            alert('✅ تم استلام طلب تصميم السيرة الذاتية الاحترافية بنجاح! سنتواصل معك فوراً.');
+            closeAtsModal();
+        }
+
+        function openRedeemModal() { document.getElementById('redeemModal').classList.remove('hidden'); }
+        function closeRedeemModal() { document.getElementById('redeemModal').classList.add('hidden'); }
+        function openPaymentModal() { document.getElementById('paymentModal').classList.remove('hidden'); }
+        function closePaymentModal() { document.getElementById('paymentModal').classList.add('hidden'); }
+
+        function copyText(txt) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(txt);
+            }
+            alert('✅ تم النسخ: ' + txt);
+        }
+
+        function submitRequestCodeButton() {
+            var acc = document.getElementById('requestCodeAccount').value.trim();
+            var rec = document.getElementById('requestCodeReceipt').value.trim();
+            if (!acc || !rec) { alert('يرجى إدخال رقم الموبايل/الإيميل ورقم إيصال التحويل.'); return; }
+            alert('📩 تم إرسال طلب الكود بنجاح! سيتم مراجعة الإيصال وتفعيل حسابك لمدة 3 شهور.');
+            closePaymentModal();
+        }
+
+        function redeemCode() {
+            var acc = document.getElementById('userAccountInput').value.trim();
+            var code = document.getElementById('activationCodeInput').value.trim().toUpperCase();
+            var found = null;
+            for (var i = 0; i < activeSubscriptions.length; i++) {
+                if (activeSubscriptions[i].account === acc && activeSubscriptions[i].code === code) {
+                    found = activeSubscriptions[i];
+                    break;
+                }
+            }
+            if (found) {
+                isPro = true;
+                currentUserAccount = acc;
+                var badge = document.getElementById('user-badge-status');
+                badge.className = 'bg-emerald-400 text-slate-950 px-2.5 py-0.5 rounded-lg font-black';
+                badge.textContent = 'Pro فعال (' + acc + ')';
+                closeRedeemModal();
+                renderJobs();
+                alert('🎉 تم تفعيل اشتراك Pro لمدة 3 شهور بنجاح! جميع الوظائف الدولية مفتوحة الآن.');
+            } else {
+                alert('❌ بيانات الحساب أو كود التفعيل غير صحيحة.');
+            }
+        }
+
+        // Secret Admin Trigger (5 clicks on Globe OR Ctrl+Shift+A)
+        var adminClicks = 0;
+        function secretAdminTrigger() {
+            adminClicks++;
+            if (adminClicks >= 5) {
+                adminClicks = 0;
+                document.getElementById('adminPasswordModal').classList.remove('hidden');
+            }
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && (e.code === 'KeyA' || e.key === 'A' || e.key === 'a')) {
+                e.preventDefault();
+                document.getElementById('adminPasswordModal').classList.remove('hidden');
+            }
+        });
+
+        function closeAdminPasswordModal() {
+            document.getElementById('adminPasswordModal').classList.add('hidden');
+            document.getElementById('adminSecretInput').value = '';
+        }
+
+        function verifyAdminPassword() {
+            var p = document.getElementById('adminSecretInput').value.trim();
+            if (p === ADMIN_SECRET_PASSWORD) {
+                closeAdminPasswordModal();
+                document.getElementById('adminModal').classList.remove('hidden');
+                renderAdminJobsTable();
+                renderAdminCodesTable();
+            } else {
+                alert('❌ كلمة المرور غير صحيحة!');
+            }
+        }
+
+        function closeAdmin() { document.getElementById('adminModal').classList.add('hidden'); }
+
+        function switchAdminTab(tab) {
+            document.getElementById('adminJobsTab').classList.add('hidden');
+            document.getElementById('adminAggregatorTab').classList.add('hidden');
+            document.getElementById('adminCodesTab').classList.add('hidden');
+
+            document.getElementById('tabJobsBtn').className = 'bg-slate-100 text-slate-700 px-4 py-2 rounded-xl transition';
+            document.getElementById('tabAggregatorBtn').className = 'bg-slate-100 text-slate-700 px-4 py-2 rounded-xl transition';
+            document.getElementById('tabCodesBtn').className = 'bg-slate-100 text-slate-700 px-4 py-2 rounded-xl transition';
+
+            if (tab === 'jobs') {
+                document.getElementById('adminJobsTab').classList.remove('hidden');
+                document.getElementById('tabJobsBtn').className = 'bg-purple-700 text-white px-4 py-2 rounded-xl transition';
+            } else if (tab === 'aggregator') {
+                document.getElementById('adminAggregatorTab').classList.remove('hidden');
+                document.getElementById('tabAggregatorBtn').className = 'bg-purple-700 text-white px-4 py-2 rounded-xl transition';
+            } else {
+                document.getElementById('adminCodesTab').classList.remove('hidden');
+                document.getElementById('tabCodesBtn').className = 'bg-purple-700 text-white px-4 py-2 rounded-xl transition';
+            }
         }
 
         function addNewJob() {
-            let title = document.getElementById('newJobTitle').value.trim();
-            let company = document.getElementById('newJobCompany').value.trim();
-            let location = document.getElementById('newJobLocation').value.trim();
-            let salary = document.getElementById('newJobSalary').value.trim();
-            let logo = document.getElementById('newJobLogo').value.trim();
-            let countryKey = document.getElementById('newJobCountryKey').value;
-            let desc = document.getElementById('newJobDesc').value.trim();
-            let visa = document.getElementById('newJobVisa').checked;
+            var title = document.getElementById('newJobTitle').value.trim();
+            var company = document.getElementById('newJobCompany').value.trim();
+            var location = document.getElementById('newJobLocation').value.trim();
+            var salary = document.getElementById('newJobSalary').value.trim();
+            var logoUrl = document.getElementById('newJobLogoUrl').value.trim();
+            var countryKey = document.getElementById('newJobCountryKey').value;
+            var workMode = document.getElementById('newJobWorkMode').value;
+            var level = document.getElementById('newJobLevel').value;
+            var desc = document.getElementById('newJobDesc').value.trim();
+            var visa = document.getElementById('newJobVisa').checked;
 
-            if (!title || !company || !location) { alert('يرجى ملء الحقول الأساسية للوظيفة.'); return; }
+            if (!title || !company || !location) {
+                alert('يرجى ملء المسمى الوظيفي واسم الشركة والموقع.');
+                return;
+            }
 
-            let newObj = { title, company, logo, location, salary, countryKey, workMode: 'onsite', level: 'mid', visa, desc };
-            defaultJobs.unshift(newObj);
-            currentJobs = [...defaultJobs];
-            renderJobs();
-            alert('✨ تمت إضافة الوظيفة وصورة الشركة بنجاح!');
+            var finalLogo = uploadedLogoBase64 || logoUrl || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(company) + '&background=2563eb&color=fff&bold=true');
+
+            var regionGroup = 'europe';
+            if (countryKey === 'saudi' || countryKey === 'uae' || countryKey === 'qatar') regionGroup = 'gcc';
+            else if (countryKey === 'usa' || countryKey === 'canada') regionGroup = 'usa';
+            else if (countryKey === 'egypt') regionGroup = 'egypt';
+
+            defaultJobs.unshift({
+                title: title,
+                company: company,
+                logo: finalLogo,
+                location: location,
+                countryKey: countryKey,
+                regionGroup: regionGroup,
+                workMode: workMode,
+                level: level,
+                salary: salary || 'Competitive',
+                visa: visa,
+                desc: desc || 'فرصة وظيفية مميزة مضافة عبر إدارة المنصة.'
+            });
+
+            uploadedLogoBase64 = '';
             document.getElementById('newJobTitle').value = '';
             document.getElementById('newJobCompany').value = '';
             document.getElementById('newJobLocation').value = '';
             document.getElementById('newJobSalary').value = '';
-            document.getElementById('newJobLogo').value = '';
+            document.getElementById('newJobLogoUrl').value = '';
+            document.getElementById('newJobLogoFile').value = '';
             document.getElementById('newJobDesc').value = '';
+
+            filterJobs();
+            alert('✨ تم نشر الوظيفة مع صورة بروفايل الشركة بنجاح!');
         }
 
-        function deleteJob(index) {
-            defaultJobs.splice(index, 1);
-            currentJobs = [...defaultJobs];
-            renderJobs();
-            alert('🗑️ تم حذف الوظيفة بنجاح.');
+        function deleteJob(idx) {
+            defaultJobs.splice(idx, 1);
+            filterJobs();
         }
 
         function renderAdminJobsTable() {
-            let tbody = document.getElementById('adminJobsTableBody');
+            var tbody = document.getElementById('adminJobsTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
-            defaultJobs.forEach((job, idx) => {
-                let tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-slate-50";
-                tr.innerHTML = `
-                    <td class="p-3 flex items-center gap-2">
-                        <img src="${job.logo || 'https://via.placeholder.com/40'}" class="w-8 h-8 rounded-xl object-cover border">
-                        <span class="font-bold">${job.title}</span>
-                    </td>
-                    <td class="p-3">${job.company} (${job.location})</td>
-                    <td class="p-3 text-center"><button onclick="deleteJob(${idx})" class="bg-red-600 text-white px-3 py-1.5 rounded-xl text-xs">حذف 🗑️</button></td>
-                `;
+            for (var i = 0; i < defaultJobs.length; i++) {
+                var j = defaultJobs[i];
+                var tr = document.createElement('tr');
+                tr.className = 'border-b hover:bg-slate-50';
+                tr.innerHTML = '<td class="p-3 flex items-center gap-2.5"><img src="' + j.logo + '" class="w-9 h-9 rounded-xl object-cover border"> <span class="font-bold">' + j.title + '</span></td>' +
+                    '<td class="p-3">' + j.company + ' (' + j.location + ')</td>' +
+                    '<td class="p-3 text-center"><button onclick="deleteJob(' + i + ')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-bold">حذف</button></td>';
                 tbody.appendChild(tr);
-            });
+            }
+        }
+
+        function fetchJobsFromWeb() {
+            var q = document.getElementById('aggregatorQuery').value.trim();
+            var plat = document.getElementById('aggregatorPlatform').value;
+            var tbody = document.getElementById('adminAggregatorTableBody');
+            if (!q) { alert('يرجى إدخال المسمى الوظيفي للبحث.'); return; }
+
+            tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-blue-600 font-bold">جاري الجلب المباشر من ' + plat + '...</td></tr>';
+            setTimeout(function() {
+                fetchedWebJobsCache = [
+                    {
+                        title: 'Senior ' + q,
+                        company: 'EuroGrid Power Corp',
+                        logo: 'https://ui-avatars.com/api/?name=EuroGrid&background=0284c7&color=fff',
+                        location: 'Berlin, ألمانيا 🇩🇪',
+                        countryKey: 'germany',
+                        regionGroup: 'europe',
+                        workMode: 'onsite',
+                        level: 'senior',
+                        salary: '€84,000 / year',
+                        visa: true,
+                        desc: 'Fetched directly via ' + plat + ' Jobs API with full relocation package.'
+                    },
+                    {
+                        title: q + ' Specialist',
+                        company: 'Gulf Energy Solutions',
+                        logo: 'https://ui-avatars.com/api/?name=Gulf+Energy&background=059669&color=fff',
+                        location: 'Riyadh, السعودية 🇸🇦',
+                        countryKey: 'saudi',
+                        regionGroup: 'gcc',
+                        workMode: 'onsite',
+                        level: 'mid',
+                        salary: 'SAR 19,500 / month',
+                        visa: true,
+                        desc: 'Fetched via ' + plat + ' with work visa sponsorship included.'
+                    }
+                ];
+                tbody.innerHTML = '';
+                for (var i = 0; i < fetchedWebJobsCache.length; i++) {
+                    var fj = fetchedWebJobsCache[i];
+                    var tr = document.createElement('tr');
+                    tr.className = 'border-b hover:bg-slate-50';
+                    tr.innerHTML = '<td class="p-3 font-bold">' + fj.title + ' <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded">' + plat + '</span></td>' +
+                        '<td class="p-3">' + fj.company + ' - ' + fj.location + '</td>' +
+                        '<td class="p-3 text-center"><button onclick="publishFetchedJobByIndex(' + i + ')" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold">➕ نشر للموقع</button></td>';
+                    tbody.appendChild(tr);
+                }
+            }, 800);
+        }
+
+        function publishFetchedJobByIndex(idx) {
+            var jobToPublish = fetchedWebJobsCache[idx];
+            if (!jobToPublish) return;
+            defaultJobs.unshift(jobToPublish);
+            filterJobs();
+            alert('✨ تم نشر الوظيفة المجلوبة على المنصة بنجاح!');
         }
 
         function createClientCode() {
-            let account = document.getElementById('adminClientAccount').value.trim();
-            let code = document.getElementById('adminCustomCode').value.trim().toUpperCase();
-            if (!account || !code) { alert('يرجى إدخال الحقول المطلوبة لتوليد الكود.'); return; }
-            activeSubscriptions.push({ account, code, expiry: Date.now() + threeMonthMs });
-            renderAdminCodesTable();
-            alert('✨ تم إنشاء الكود وربطه لمدة 3 شهور بنجاح!');
+            var acc = document.getElementById('adminClientAccount').value.trim();
+            var code = document.getElementById('adminCustomCode').value.trim().toUpperCase();
+            if (!acc || !code) { alert('أدخل حساب العميل والكود.'); return; }
+            activeSubscriptions.push({ account: acc, code: code, expiry: Date.now() + threeMonthMs });
             document.getElementById('adminClientAccount').value = '';
             document.getElementById('adminCustomCode').value = '';
+            renderAdminCodesTable();
+            alert('✨ تم إنشاء وتفعيل الكود لمدة 3 شهور!');
+        }
+
+        function deleteClientCode(idx) {
+            activeSubscriptions.splice(idx, 1);
+            renderAdminCodesTable();
         }
 
         function renderAdminCodesTable() {
-            let tbody = document.getElementById('adminCodesTableBody');
+            var tbody = document.getElementById('adminCodesTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
-            activeSubscriptions.forEach((sub, idx) => {
-                let tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-slate-50";
-                tr.innerHTML = `
-                    <td class="p-3 font-mono">${sub.account}</td>
-                    <td class="p-3 font-mono font-bold text-purple-700">${sub.code}</td>
-                    <td class="p-3 text-center"><button onclick="activeSubscriptions.splice(${idx},1); renderAdminCodesTable();" class="bg-red-600 text-white px-3 py-1.5 rounded-xl text-xs">إلغاء 🗑️</button></td>
-                `;
+            for (var i = 0; i < activeSubscriptions.length; i++) {
+                var s = activeSubscriptions[i];
+                var tr = document.createElement('tr');
+                tr.className = 'border-b hover:bg-slate-50';
+                tr.innerHTML = '<td class="p-3 font-mono">' + s.account + '</td>' +
+                    '<td class="p-3 font-mono font-bold text-purple-700">' + s.code + '</td>' +
+                    '<td class="p-3 text-center"><button onclick="deleteClientCode(' + i + ')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-bold">إلغاء</button></td>';
                 tbody.appendChild(tr);
-            });
-        }
-
-        function submitRequestCodeButton() {
-            let account = document.getElementById('requestCodeAccount').value.trim();
-            let receipt = document.getElementById('requestCodeReceipt').value.trim();
-            if (!account || !receipt) { alert('يرجى إدخال البيانات كاملة.'); return; }
-            alert('📩 تم إرسال طلبك بنجاح، سيتم إرسال كود التفعيل قريباً بعد التحقق من التحويل!');
-            closePaymentModal();
-        }
-
-        let clickCount = 0;
-        function secretAdminTrigger() {
-            clickCount++;
-            if (clickCount >= 5) { clickCount = 0; document.getElementById('adminPasswordModal').classList.remove('hidden'); }
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.code === 'KeyA') { e.preventDefault(); document.getElementById('adminPasswordModal').classList.remove('hidden'); }
-        });
-
-        function closeAdminPasswordModal() { document.getElementById('adminPasswordModal').classList.add('hidden'); document.getElementById('adminSecretInput').value = ''; }
-        function verifyAdminPassword() {
-            let pass = document.getElementById('adminSecretInput').value.trim();
-            if (pass === ADMIN_SECRET_PASSWORD) { closeAdminPasswordModal(); document.getElementById('adminModal').classList.remove('hidden'); renderAdminJobsTable(); renderAdminCodesTable(); }
-            else { alert('❌ كلمة المرور غير صحيحة!'); }
-        }
-        function closeAdmin() { document.getElementById('adminModal').classList.add('hidden'); }
-
-        function openRedeemModal() { document.getElementById('redeemModal').classList.remove('hidden'); }
-        function closeRedeemModal() { document.getElementById('redeemModal').classList.add('hidden'); }
-        function openPaymentModal() { document.getElementById('paymentModal').classList.remove('hidden'); }
-        function closePaymentModal() { document.getElementById('paymentModal').classList.add('hidden'); }
-
-        function redeemCode() {
-            let account = document.getElementById('userAccountInput').value.trim();
-            let code = document.getElementById('activationCodeInput').value.trim().toUpperCase();
-            let foundSub = activeSubscriptions.find(s => s.account === account && s.code === code);
-            if (foundSub) {
-                isPro = true;
-                currentUserAccount = account;
-                closeRedeemModal();
-                renderJobs();
-                alert('🎉 تم تفعيل Pro لمدة 3 شهور بنجاح واستمتع بكافة الوظائف المتاحة.');
-            } else {
-                alert('❌ الإيميل أو الكود غير صحيح.');
             }
         }
 
-        renderJobs();
-    </script>
-</body>
-</html>
-�يميل أو الكود غير صحيح.');
+        // Dynamic Online Counter Simulation
+        setInterval(function() {
+            var el = document.getElementById('onlineUsersCount');
+            if (el) {
+                var cur = parseInt(el.textContent, 10) || 12;
+                var diff = Math.floor(Math.random() * 3) - 1;
+                el.textContent = Math.max(5, cur + diff);
             }
-        }
+        }, 5000);
 
-        renderJobs();
-    </script>
-</body>
-</html>
-lin, Germany 🇩🇪", countryKey: "germany", workMode: "remote", level: "senior", salary: "€85,000", visa: true, desc: "Real-time fetched from LinkedIn Jobs.", source: "LinkedIn" },
-                    { title: query + " Lead", company: "Amazon Web Services", location: "Dubai, UAE 🇦🇪", countryKey: "uae", workMode: "onsite", level: "senior", salary: "AED 25,000", visa: true, desc: "Real-time fetched from Indeed.", source: "Indeed" }
-                ];
-
-                tbody.innerHTML = '';
-                fetchedResults.forEach((job) => {
-                    let tr = document.createElement('tr');
-                    tr.className = "border-b hover:bg-slate-50";
-                    tr.innerHTML = `
-                        <td class="p-3"><span class="font-bold block">${job.title}</span><span class="text-[10px] bg-purple-100 text-purple-700 px-1.5 rounded font-mono">${job.source}</span></td>
-                        <td class="p-3">${job.company} <br><span class="text-slate-400">${job.location}</span></td>
-                        <td class="p-3 text-center"><button onclick='publishFetchedJob(${JSON.stringify(job)})' class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow">➕ نشر</button></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }, 1000);
-        }
-
-        function publishFetchedJob(jobObj) {
-            defaultJobs.unshift(jobObj);
-            currentJobs = [...defaultJobs];
-            renderJobs();
-            alert('✨ تم نشر الوظيفة بنجاح!');
-        }
-
-        function submitRequestCodeButton() {
-            let account = document.getElementById('requestCodeAccount').value.trim();
-            let receipt = document.getElementById('requestCodeReceipt').value.trim();
-            if (!account || !receipt) { alert('يرجى إدخال البيانات كاملة.'); return; }
-            alert('📩 تم إرسال طلب الكود بنجاح!');
-            closePaymentModal();
-        }
-
-        let clickCount = 0;
-        function secretAdminTrigger() {
-            clickCount++;
-            if (clickCount >= 5) { clickCount = 0; document.getElementById('adminPasswordModal').classList.remove('hidden'); }
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.code === 'KeyA') { e.preventDefault(); document.getElementById('adminPasswordModal').classList.remove('hidden'); }
-        });
-
-        function closeAdminPasswordModal() { document.getElementById('adminPasswordModal').classList.add('hidden'); document.getElementById('adminSecretInput').value = ''; }
-        function verifyAdminPassword() {
-            let pass = document.getElementById('adminSecretInput').value.trim();
-            if (pass === ADMIN_SECRET_PASSWORD) { closeAdminPasswordModal(); document.getElementById('adminModal').classList.remove('hidden'); }
-            else { alert('❌ كلمة المرور غير صحيحة!'); }
-        }
-        function closeAdmin() { document.getElementById('adminModal').classList.add('hidden'); }
-
-        function openRedeemModal() { document.getElementById('redeemModal').classList.remove('hidden'); }
-        function closeRedeemModal() { document.getElementById('redeemModal').classList.add('hidden'); }
-        function openPaymentModal() { document.getElementById('paymentModal').classList.remove('hidden'); }
-        function closePaymentModal() { document.getElementById('paymentModal').classList.add('hidden'); }
-        function openAtsModal() { if (!isPro) { openRedeemModal(); return; } document.getElementById('atsModal').classList.remove('hidden'); }
-        function closeAtsModal() { document.getElementById('atsModal').classList.add('hidden'); }
-        function submitAtsRequest() { alert('تم استلام طلبك بنجاح!'); closeAtsModal(); }
-
-        function redeemCode() {
-            let account = document.getElementById('userAccountInput').value.trim();
-            let code = document.getElementById('activationCodeInput').value.trim().toUpperCase();
-            let foundSub = activeSubscriptions.find(s => s.account === account && s.code === code);
-            if (foundSub) {
-                isPro = true;
-                currentUserAccount = account;
-                updateUIStatus();
-                closeRedeemModal();
-                renderJobs();
-                alert('🎉 تم تفعيل Pro لمدة 3 شهور بنجاح.');
-            } else {
-                alert('❌ الإيميل أو الكود غير صحيح.');
-            }
-        }
-
-        function updateUIStatus() {
-            const badge = document.getElementById('user-badge-status');
-            if (isPro) {
-                badge.className = "bg-green-500 text-slate-950 px-3 py-1 rounded-xl font-black";
-                badge.innerText = `Pro (${currentUserAccount} 🟢)`;
-            } else {
-                badge.className = "bg-amber-500 text-slate-950 px-3 py-1 rounded-xl font-black";
-                badge.innerText = translations[currentLang].freeText;
-            }
-        }
-
-        // Real dynamic counters update simulation
-        setInterval(() => {
-            let onlineEl = document.getElementById('onlineUsersCount');
-            if(onlineEl) {
-                let current = parseInt(onlineEl.innerText) || 4;
-                let change = Math.floor(Math.random() * 3) - 1;
-                onlineEl.innerText = Math.max(2, current + change);
-            }
-        }, 6000);
-
+        // Initial Render
         renderJobs();
     </script>
 </body>
