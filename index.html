@@ -140,7 +140,7 @@
         <!-- Filters Sidebar -->
         <aside class="lg:col-span-1 space-y-6 h-fit">
             
-            <!-- Professional CV Design Service Card (Added as requested) -->
+            <!-- Professional CV Design Service Card -->
             <div class="bg-gradient-to-br from-blue-950 via-indigo-900 to-slate-900 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden border border-blue-500/30 space-y-3">
                 <div class="absolute top-3 left-3 bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                     PRO حصرياً
@@ -461,7 +461,6 @@
                 <button onclick="switchAdminTab('codes')" id="tabCodesBtn" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl transition">أكواد الـ 3 شهور 🔑</button>
             </div>
 
-            <!-- Tab 1: Manage Jobs & Company Logos -->
             <div id="adminJobsTab" class="space-y-4 text-xs">
                 <div class="bg-purple-50 p-4 rounded-3xl border border-purple-200 space-y-3">
                     <span class="font-bold text-purple-900 block text-sm">إضافة وظيفة يدوياً مع صورة بروفايل الشركة:</span>
@@ -472,7 +471,7 @@
                         <input type="text" id="newJobSalary" placeholder="الراتب..." class="bg-white border rounded-2xl px-3 py-2.5">
                     </div>
                     <div>
-                        <label class="font-semibold text-slate-700 block mb-1">صورة بروفايل الشركة (رابط صورة Logo أو رفع):</label>
+                        <label class="font-semibold text-slate-700 block mb-1">صورة بروفايل الشركة (رابط صورة Logo):</label>
                         <input type="text" id="newJobLogo" placeholder="https://example.com/logo.png" class="w-full bg-white border rounded-2xl px-3 py-2.5">
                     </div>
                     <select id="newJobCountryKey" class="w-full bg-white border rounded-2xl px-3 py-2.5">
@@ -507,7 +506,6 @@
                 </div>
             </div>
 
-            <!-- Tab 2: Codes -->
             <div id="adminCodesTab" class="space-y-4 text-xs hidden">
                 <div class="bg-purple-50 p-4 rounded-3xl border border-purple-200 space-y-3">
                     <span class="font-bold text-purple-900 block text-sm">إنشاء كود مخصص لعميل جديد (3 شهور بالضبط):</span>
@@ -803,6 +801,14 @@
                 alert('🎉 تم تفعيل Pro لمدة 3 شهور بنجاح واستمتع بكافة الوظائف المتاحة.');
             } else {
                 alert('❌ الإيميل أو الكود غير صحيح.');
+            }
+        }
+
+        renderJobs();
+    </script>
+</body>
+</html>
+�يميل أو الكود غير صحيح.');
             }
         }
 
