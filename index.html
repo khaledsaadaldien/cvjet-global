@@ -141,7 +141,7 @@
         </div>
     </section>
 
-    <!-- Hero & AI ATS Matcher Section -->
+    <!-- Hero Section -->
     <section class="bg-slate-900 text-white py-12 sm:py-20 px-4 sm:px-6 lg:px-8 grid-bg relative border-b border-slate-800">
         <div class="max-w-5xl mx-auto text-center space-y-6">
             <div class="inline-flex items-center gap-2 bg-blue-500/15 border border-blue-400/30 px-4 py-1.5 rounded-full text-blue-300 text-xs font-bold">
@@ -170,7 +170,6 @@
                 </div>
             </div>
 
-            <!-- Upload Card -->
             <div class="bg-slate-800/90 border border-slate-700 p-6 sm:p-8 rounded-3xl shadow-2xl max-w-2xl mx-auto space-y-4 backdrop-blur">
                 <div onclick="openAtsScannerModal()" class="border-2 border-dashed border-slate-600 hover:border-emerald-400 rounded-2xl p-6 sm:p-8 transition cursor-pointer bg-slate-900/60 group">
                     <div class="w-14 h-14 bg-emerald-500/20 text-emerald-400 group-hover:scale-110 transition rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
@@ -192,8 +191,6 @@
             
             <!-- Sidebar -->
             <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
-                
-                <!-- Pro CV Service Card -->
                 <div class="bg-gradient-to-br from-indigo-950 via-blue-950 to-slate-900 text-white p-6 rounded-3xl shadow-xl relative overflow-hidden border border-indigo-500/30 space-y-3.5">
                     <div class="flex justify-between items-center">
                         <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">PRO حصرياً</span>
@@ -206,7 +203,6 @@
                     </button>
                 </div>
 
-                <!-- Filters -->
                 <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                         <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
@@ -447,18 +443,19 @@
         </div>
     </div>
 
-    <!-- Admin Password Modal (Fixed Clean Input) -->
+    <!-- Admin Password Modal (Fixed Clean Input & Correct Password prompt) -->
     <div id="adminPasswordModal" class="modal-overlay hidden">
         <div class="modal-box max-w-sm p-6 text-center space-y-4 relative">
+            <button onclick="closeAdminPasswordModal()" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
             <div class="w-12 h-12 bg-purple-100 text-purple-700 rounded-2xl flex items-center justify-center mx-auto text-xl">
                 <i class="fa-solid fa-shield-halved"></i>
             </div>
             <h3 class="text-lg font-black text-slate-900">دخول لوحة التحكم (Admin Panel)</h3>
-            <p class="text-xs text-slate-500">الرقم السري الافتراضي للنظام هو: <strong class="text-purple-700 font-mono">admin123</strong></p>
-            <input type="password" id="adminSecretInput" placeholder="اكتب كلمة المرور هنا..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-center font-mono">
+            <p class="text-xs text-slate-500">أدخل كلمة المرور الخاصة بلوحة التحكم:</p>
+            <input type="password" id="adminSecretInput" placeholder="أدخل كلمة المرور هنا..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-center font-mono focus:outline-none focus:border-purple-600">
             <div class="flex gap-2">
                 <button onclick="closeAdminPasswordModal()" class="w-1/2 bg-slate-200 text-slate-800 py-2.5 rounded-xl font-bold text-xs">إلغاء</button>
-                <button onclick="verifyAdminPassword()" class="w-1/2 bg-purple-700 hover:bg-purple-600 text-white py-2.5 rounded-xl font-bold text-xs">دخول ⚙️</button>
+                <button onclick="verifyAdminPassword()" class="w-1/2 bg-purple-700 hover:bg-purple-600 text-white py-2.5 rounded-xl font-bold text-xs shadow">دخول ⚙️</button>
             </div>
         </div>
     </div>
@@ -946,12 +943,12 @@
 
         function loadSiteSettingsIntoAdminInputs() {
             document.getElementById('cfgFreeLimit').value = siteConfig.freeJobsLimit !== undefined ? siteConfig.freeJobsLimit : 5;
-            document.getElementById('cfgAdminPass').value = siteConfig.adminPassword || 'admin123';
+            document.getElementById('cfgAdminPass').value = siteConfig.adminPassword || 'adminadmin123';
         }
 
         function saveSiteSettingsFromAdmin() {
             siteConfig.freeJobsLimit = parseInt(document.getElementById('cfgFreeLimit').value, 10) || 5;
-            siteConfig.adminPassword = document.getElementById('cfgAdminPass').value.trim() || 'admin123';
+            siteConfig.adminPassword = document.getElementById('cfgAdminPass').value.trim() || 'adminadmin123';
             persistAllData();
             applySiteConfigToUI();
             renderJobs();
@@ -1107,7 +1104,7 @@
 
         function verifyAdminPassword() {
             var p = document.getElementById('adminSecretInput').value.trim();
-            var actualPass = siteConfig.adminPassword || 'admin123';
+            var actualPass = siteConfig.adminPassword || 'adminadmin123';
             if (p === actualPass) {
                 closeAdminPasswordModal();
                 loadSiteSettingsIntoAdminInputs();
@@ -1115,7 +1112,7 @@
                 renderAdminCodesTable();
                 document.getElementById('adminModal').classList.remove('hidden');
             } else {
-                alert('❌ كلمة المرور غير صحيحة! (الافتراضية: admin123)');
+                alert('❌ كلمة المرور غير صحيحة! (الرقم السري هو: adminadmin123)');
             }
         }
 
@@ -1164,8 +1161,7 @@
     </script>
 </body>
 </html>
-       tr.innerHTML = '<td class="p-3 font-mono">' + s.account + '</td>' +
-                    '<td class="p-3 font-mono font-bold text-purple-700">' + s.code + '</td>' +
+                '<td class="p-3 font-mono font-bold text-purple-700">' + s.code + '</td>' +
                     '<td class="p-3 text-center"><button onclick="deleteClientCode(' + i + ')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-bold">حذف</button></td>';
                 tbody.appendChild(tr);
             }
